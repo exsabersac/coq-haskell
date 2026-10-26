@@ -1,3 +1,16 @@
+(*
+Continuation monad: Cont R A := (A -> R) -> R.
+F/A/M instances use join-as-primitive (Cont_join).
+Law proofs are NYI (commented). Cont_parametricity is shown via Yoneda
+on Identity — free theorems / parametricity style.
+
+--------
+延续单子：Cont R A := (A → R) → R。
+F/A/M 实例以 join 为原语（Cont_join）。
+定律证明 NYI（注释掉）。Cont_parametricity 经 Yoneda(Identity)
+给出——自由定理 / 参数性风格。
+*)
+
 Require Import Hask.Prelude.
 Require Import Hask.Control.Monad.
 Require Import Hask.Data.Functor.Identity.
@@ -8,6 +21,7 @@ Set Primitive Projections.
 Set Universe Polymorphism.
 Unset Transparent Obligations.
 
+(* Cont R A = (A -> R) -> R. / 延续：把 A 的延续接到 R。 *)
 Definition Cont (R A : Type) : Type := (A -> R) -> R.
 
 Definition Cont_map {R X Y} (f : X -> Y) (k : Cont R X) : Cont R Y :=

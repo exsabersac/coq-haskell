@@ -1,3 +1,19 @@
+(*
+Freer / CPS Free monad (same name Free as Free.v — different encoding):
+  Free f a := forall r, (a -> r) -> (forall x, (x -> r) -> f x -> r) -> r
+No inductive Join; interpretation is by supplying Pure/Join continuations.
+Same surface API as Free.v (iter, liftF, retract, hoistFree, foldFree).
+F/A/M instances; FreeLaws with several Admitted.
+Conversion Free <-> Freer sketched in comments at bottom.
+
+--------
+Freer / CPS 式 Free（与 Free.v 同名 Free——编码不同）：
+  Free f a := ∀ r, (a → r) → (∀ x, (x → r) → f x → r) → r
+无归纳 Join；靠传入 Pure/Join 延续来解释。
+表面 API 与 Free.v 对齐。F/A/M；FreeLaws 若干 Admitted。
+文末注释草绘 Free ↔ Freer 互转。
+*)
+
 Require Import Hask.Prelude.
 Require Import Hask.Control.Monad.
 
@@ -6,6 +22,7 @@ Set Primitive Projections.
 Set Universe Polymorphism.
 Unset Transparent Obligations.
 
+(* CPS Freer encoding (not inductive). / CPS Freer 编码（非归纳）。 *)
 Definition Free (f : Type -> Type) (a : Type) :=
   forall r, (a -> r) -> (forall x, (x -> r) -> f x -> r) -> r.
 

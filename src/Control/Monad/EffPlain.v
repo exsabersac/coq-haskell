@@ -1,3 +1,18 @@
+(*
+Eff variant with axiomatic IO as the only base:
+  TFree xs a := Kleisli IO (Effects IO xs) a  (= Effects -> IO a)
+Same Handles / Abortive / Reader examples as Eff.v, but IO is Axiom'd.
+Also defines Impl / Kleisli F/A/(partial)M for the function space.
+Companion to Eff.v; both experimental and off the default build.
+
+--------
+以公理 IO 为唯一基的 Eff 变体：
+  TFree xs a := Kleisli IO (Effects IO xs) a（= Effects → IO a）
+Handles / Abortive / Reader 示例同 Eff.v，但 IO 是 Axiom。
+另为函数空间定义 Impl / Kleisli 的 F/A/（部分）M。
+与 Eff.v 配套；均属实验，默认不编。
+*)
+
 Require Import
   Hask.Control.Monad
   Hask.Data.Maybe
@@ -47,6 +62,7 @@ Proof.
   exact X1.
 Defined.
 
+(* Axiomatic IO base (not extracted). / 公理 IO 基（不抽取）。 *)
 Axiom IO : Type -> Type.
 Axiom IO_Functor : Functor IO.
 Axiom IO_Applicative : Applicative IO.

@@ -1,3 +1,14 @@
+(*
+MonadTrans: lift : M A -> T M A for transformer T.
+Laws (in MonadTransLaws): lift . pure = pure; lift preserves bind.
+Note: the Corollary references a misnamed field (trans_law_3) — sketchy.
+
+--------
+MonadTrans：lift : M A → T M A。
+定律（MonadTransLaws）：lift ∘ pure = pure；lift 保持 bind。
+注意：Corollary 引用了错名的字段（trans_law_3）——草图级。
+*)
+
 Require Import Hask.Prelude.
 Require Import Hask.Control.Monad.
 
@@ -6,6 +17,7 @@ Set Primitive Projections.
 Set Universe Polymorphism.
 Unset Transparent Obligations.
 
+(* lift : M a -> T M a. / 抬入变换器。 *)
 Class MonadTrans (T : (Type -> Type) -> Type -> Type) :=
 { lift : forall (M : Type -> Type) `{Monad M} `{Monad (T M)} A, M A -> T M A
 }.

@@ -1,3 +1,20 @@
+(*
+Lightweight effect system sketch: Effect := (Type -> Type) -> Type;
+Effects m [e1;…] is a heterogeneous list of effect handlers for base m.
+TFree / Eff xs m a := Effects m xs -> m a.
+Handles typeclass projects one effect from the list; liftF / interpret.
+Examples: Abortive + Reader over Maybe. Not in default _CoqProject.
+(EffPlain.v is a variant fixed to an axiomatic IO base.)
+
+--------
+轻量效应系统草图：Effect := (Type → Type) → Type；
+Effects m [e1;…] 是基单子 m 上的效应处理器异构列表。
+TFree / Eff xs m a := Effects m xs → m a。
+Handles 从列表投影某一效应；liftF / interpret。
+示例：Maybe 上的 Abortive + Reader。默认不进 _CoqProject。
+（EffPlain.v 是固定到公理 IO 基的变体。）
+*)
+
 Require Import
   Hask.Control.Monad
   Hask.Data.Maybe
@@ -10,6 +27,7 @@ Unset Transparent Obligations.
 
 Import ListNotations.
 
+(* Effect descriptor parameterized by base monad. / 由基单子参数化的效应描述符。 *)
 Definition Effect := (Type -> Type) -> Type.
 
 Inductive Effects (m : Type -> Type) : list Effect -> Type :=
@@ -47,6 +65,7 @@ Proof.
   exact X1.
 Defined.
 
+(* Program given a bundle of handlers. / 给定处理器束的程序。 *)
 Definition TFree `(xs : list Effect) m a :=
   Effects m xs -> m a.
 

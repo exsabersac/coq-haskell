@@ -1,3 +1,16 @@
+(*
+MonadBaseControl (monad-control): run a stack in its base, then restore.
+StM m a is the "state" shape returned by RunInBase; liftBaseWith / restoreM.
+Laws: pure in base lifts to pure; bind in base distributes; round-trip.
+Active instance: StateT. FreeT control sketched but commented.
+
+--------
+MonadBaseControl（monad-control）：在基单子中跑栈再 restore。
+StM m a 是 RunInBase 返回的「状态」形状；liftBaseWith / restoreM。
+定律：基中 pure 抬成 pure；基中 bind 分配；往返恒等。
+激活实例：StateT。FreeT 控制草图已注释。
+*)
+
 (* Require Import Hask.Data.Functor.Identity. *)
 Require Import Hask.Control.Monad.
 Require Import Hask.Control.Monad.Base.
@@ -9,6 +22,7 @@ Set Primitive Projections.
 Set Universe Polymorphism.
 Unset Transparent Obligations.
 
+(* StM: result shape after running in base. / 跑进基后的结果形状。 *)
 Class StMC (m : Type -> Type) : Type := {
   StM : Type -> Type
 }.
@@ -16,6 +30,7 @@ Arguments StM m {_} a.
 
 Definition RunInBase m `{StMC m} b := forall a, m a -> b (StM m a).
 
+(* liftBaseWith / restoreM. / 在基中跑再恢复。 *)
 Class MonadBaseControl b m `{MonadBase b m} `{StMC m} := {
   liftBaseWith : forall a, (RunInBase m b -> b a) -> m a;
   restoreM : forall a, StM m a -> m a

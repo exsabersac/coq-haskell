@@ -1,3 +1,18 @@
+(*
+FreeT: free monad transformer (CPS form, like Freer over an inner m):
+  FreeT f m a := forall r, (a -> m r) -> (forall x, (x -> m r) -> f x -> m r) -> m r
+Also inductive FreeF / FreeTi and conversion toFreeT.
+iterT / liftF / liftFM. Monad instance commented (universe issues in Coq 8.6).
+Companion to Control/Monad/Free.v and Freer.v.
+
+--------
+FreeT：自由单子变换器（CPS，像 Freer 套内层 m）：
+  FreeT f m a := ∀ r, (a → m r) → (∀ x, (x → m r) → f x → m r) → m r
+另有归纳 FreeF / FreeTi 与 toFreeT。
+iterT / liftF / liftFM。Monad 实例因宇宙问题注释（Coq 8.6）。
+配套 Control/Monad/Free.v 与 Freer.v。
+*)
+
 Require Import Hask.Control.Monad.
 
 Generalizable All Variables.
@@ -6,6 +21,7 @@ Set Universe Polymorphism.
 Unset Transparent Obligations.
 Set Asymmetric Patterns.
 
+(* CPS Free over inner monad m. / 内层 m 上的 CPS Free。 *)
 Definition FreeT (f m : Type -> Type) (a : Type) :=
   forall r, (a -> m r) -> (forall x, (x -> m r) -> f x -> m r) -> m r.
 

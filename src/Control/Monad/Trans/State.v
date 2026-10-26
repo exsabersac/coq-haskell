@@ -12,10 +12,22 @@ Set Implicit Arguments.
 Unset Strict Implicit.
 Unset Printing Implicit Defensive.
 
-(******************************************************************************
- * The StateT Monad transformer
- *)
+(*
+StateT transformer: StateT s m a := s -> m (a * s)%type
+(result * state order — Haskell-like).
+getT / getsT / putT / modifyT; F/A/M; MonadTrans lift.
+liftStateT embeds plain State into StateT.
+StateTLaws largely Admitted (SSR proofs left in comments).
 
+--------
+StateT 变换器：StateT s m a := s → m (a * s)%type
+（结果在前、状态在后——Haskell 风格）。
+getT / getsT / putT / modifyT；F/A/M；MonadTrans lift。
+liftStateT 把普通 State 嵌入 StateT。
+StateTLaws 多半 Admitted（SSR 证明留在注释里）。
+*)
+
+(* s -> m (a * s). / Haskell 序：结果在前。 *)
 Definition StateT (s : Type) (m : Type -> Type) (a : Type):=
   s -> m (a * s)%type.
 
