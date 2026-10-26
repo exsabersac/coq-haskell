@@ -1,3 +1,15 @@
+(*
+Length-indexed vectors: Vec n is nested products ending in unit
+(Vec 0 = unit, Vec (S n) = A * Vec n). Live surface: vnil / vsing.
+The bulk (vcons, folds, vnth, vmap, …) is MathComp-oriented and
+currently commented out inside the section.
+
+--------
+长度索引向量：Vec n 是以 unit 收尾的嵌套积
+（Vec 0 = unit，Vec (S n) = A * Vec n）。现行接口：vnil / vsing。
+主体（vcons、折叠、vnth、vmap…）偏 MathComp，目前在 section 内注释。
+*)
+
 Require Import Hask.Prelude.
 Require Import Hask.Ltac.
 
@@ -10,17 +22,24 @@ Section Vector.
 
 Variable A : Type.
 
+(* Nested-product encoding of length-n vectors.
+   --------
+   长度为 n 的向量的嵌套积编码。 *)
 Definition Vec : nat -> Type :=
   fix vec n := match n return Type with
                | O   => unit
                | S n => prod A (vec n)
                end.
 
+(* Empty / singleton. / 空向量 / 单点向量。 *)
 Definition vnil : Vec 0 := tt.
 
 Definition vsing (x : A) : Vec 1 := (x, tt).
 
 (*
+(* Below: cons, folds, indexing, map, … (commented).
+   --------
+   以下：cons、折叠、下标、map…（已注释）。 *)
 Definition vcons {n} (x : A) (v : Vec n) : Vec n.+1 := (x, v).
 
 Definition fin_contra : forall {x}, 'I_0 -> x.

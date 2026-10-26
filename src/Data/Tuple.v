@@ -1,3 +1,14 @@
+(*
+Tuple helpers: reassociation, first/second, curry/uncurry,
+and prod_map (fmap on the second component) with identity/composition laws.
+Isomorphism instances for unit×A ≅ A are commented out (need Iso).
+
+--------
+元组工具：重结合、first/second、curry/uncurry，
+以及 prod_map（在第二分量上 fmap）及其恒等/复合律。
+unit×A ≅ A 的同构实例已注释（依赖 Iso）。
+*)
+
 Require Import Hask.Ltac.
 (* Require Import Hask.Control.Iso. *)
 
@@ -30,6 +41,7 @@ Defined.
 *)
 *)
 
+(* Reassociate nested products. / 重结合嵌套积。 *)
 Definition tuple_swap_a_bc_to_ab_c {A B C} (x : A * (B * C)) : A * B * C :=
   match x with (a, (b, c)) => ((a, b), c) end.
 
@@ -72,12 +84,16 @@ Defined.
 *)
 *)
 
+(* Map left / right of a pair. / 映射对的左/右分量。 *)
 Definition first `(f : a -> b) `(x : a * z) : b * z :=
   match x with (a, z) => (f a, z) end.
 
 Definition second `(f : a -> b) `(x : z * a) : z * b :=
   match x with (z, b) => (z, f b) end.
 
+(* Curry / uncurry between Hom(A×B,C) and Hom(A, Hom(B,C)).
+   --------
+   柯里化 / 反柯里化。 *)
 Definition curry `(f : a -> b -> c) (x : (a * b)) : c :=
   match x with (a, b) => f a b end.
 
@@ -103,6 +119,7 @@ Proof.
   destruct x; auto.
 Qed.
 
+(* fmap on the second component (fixed first). / 固定第一分量，映射第二分量。 *)
 Definition prod_map {A B C : Type} (f : A -> B) (x : C * A) : C * B :=
   match x with (a, b) => (a, f b) end.
 
@@ -110,6 +127,7 @@ Require Import FunctionalExtensionality.
 
 Module TupleLaws.
 
+(* Functor laws for prod_map. / prod_map 的函子律。 *)
 Theorem prod_map_id {E A} : @prod_map A A E id = id.
 Proof.
   extensionality x.

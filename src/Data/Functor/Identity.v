@@ -1,3 +1,16 @@
+(*
+Identity functor/monad in two flavors:
+  - Identity a := a          (type synonym; fmap/pure/join = id)
+  - IdentityF                (inductive wrapper Id)
+Both sit at the bottom of the F/A/M tower as the "no effect" case.
+
+--------
+恒等函子/单子的两种写法：
+  - Identity a := a          （类型同义词；fmap/pure/join = id）
+  - IdentityF                （归纳包装 Id）
+二者都是 F/A/M 塔底端的「无效应」情形。
+*)
+
 Require Import Hask.Prelude.
 Require Import Hask.Control.Monad.
 
@@ -7,7 +20,7 @@ Set Universe Polymorphism.
 Unset Transparent Obligations.
 Set Asymmetric Patterns.
 
-(* Identity, in two flavors. *)
+(* Type-synonym Identity. / 类型同义词版 Identity。 *)
 
 Definition Identity (a : Type) := a.
 
@@ -27,6 +40,7 @@ Program Instance Identity_Monad : Monad Identity := {
   join := fun _ => id
 }.
 
+(* Inductive wrapper IdentityF. / 归纳包装版 IdentityF。 *)
 Inductive IdentityF (a : Type) := Id : a -> IdentityF a.
 
 Definition runIdentityF `(x : IdentityF a) : a :=

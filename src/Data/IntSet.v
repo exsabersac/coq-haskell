@@ -1,3 +1,14 @@
+(*
+IntSet stub for extraction: Coq side is a thin wrapper around seq nat
+(member/insert/union/…); extracted Haskell uses Data.IntSet.
+Body is currently commented out (MathComp-style).
+
+--------
+面向抽取的 IntSet 桩：Coq 侧是 seq nat 的薄包装
+（member/insert/union/…）；抽出的 Haskell 用 Data.IntSet。
+主体目前整段注释（MathComp 风格）。
+*)
+
 Require Import Hask.Prelude.
 Require Import Hask.Data.List.
 Require Import Hask.Data.NonEmpty.
@@ -11,6 +22,7 @@ Set Universe Polymorphism.
 Unset Transparent Obligations.
 
 (*
+(* Wrapper: set of nats as a sequence. / 包装：用序列表示 nat 集合。 *)
 Inductive IntSet := getIntSet of seq nat.
 
 Arguments getIntSet _.
@@ -19,9 +31,9 @@ Definition emptyIntSet := getIntSet [::].
 
 Definition IntSet_singleton (x : nat) := getIntSet [:: x].
 
-(* We needn't bother defining these in Coq, since they only matter to the
-   extracted Haskell code, and there we use the definitions from
-   [Data.IntMap]. *)
+(* Coq defs are only for reasoning; extraction remaps to Data.IntSet.
+   --------
+   Coq 定义仅供推理；抽取时映射到 Data.IntSet。 *)
 Definition IntSet_member : nat -> IntSet -> bool :=
   fun k m => let: getIntSet xs := m in k \in xs.
 

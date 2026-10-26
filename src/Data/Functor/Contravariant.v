@@ -1,3 +1,14 @@
+(*
+Contravariant functor: contramap (a → b) → f b → f a
+(arrow flips; dual to Functor). Laws (identity + composition) in
+ContravariantLaws. Compose F G is contravariant when G is.
+
+--------
+反变函子：contramap (a → b) → f b → f a
+（箭头反向；Functor 的对偶）。定律（恒等 + 复合）在
+ContravariantLaws。G 反变时，复合 F∘G 也反变。
+*)
+
 Require Import Hask.Ltac.
 Require Import Hask.Data.Functor.
 
@@ -6,6 +17,7 @@ Set Primitive Projections.
 Set Universe Polymorphism.
 Unset Transparent Obligations.
 
+(* Class: contramap only. / 类：仅 contramap。 *)
 Class Contravariant (f : Type -> Type) := {
   contramap : forall {a b : Type}, (a -> b) -> f b -> f a
 }.
@@ -22,10 +34,14 @@ Notation "contramap[ M N ]  f" :=
 Notation "contramap[ M N O ]  f" :=
   (@contramap (fun X => M (N (O X))) _ _ _ f) (at level 9).
 
+(* Phantom coerce when both Functor and Contravariant. / 同时函子+反变时可强制换型。 *)
 Definition coerce `{Functor f} `{Contravariant f} {a b} : f a -> f b :=
   fmap (False_rect _) \o contramap (False_rect _).
 
 #[export]
+(* F∘G contravariant if G is (fmap outside, contramap inside).
+   --------
+   G 反变则 F∘G 反变（外层 fmap，内层 contramap）。 *)
 Instance Contravariant_Compose `{Functor F} `{Contravariant G} :
   Contravariant (F \o G) :=
 { contramap := fun A B => @fmap F _ (G B) (G A) \o @contramap G _ A B
@@ -37,6 +53,11 @@ Module ContravariantLaws.
 
 Include FunctorLaws.
 
+(* Laws: contramap id = id ; contramap g ∘ contramap f = contramap (f ∘ g)
+   (note composition order flips vs Functor).
+   --------
+   定律：contramap id = id；contramap g ∘ contramap f = contramap (f ∘ g)
+   （复合顺序相对 Functor 翻转）。 *)
 Class ContravariantLaws (f : Type -> Type) `{Contravariant f} := {
   contramap_id   : forall a : Type, contramap (@id a) = id;
   contramap_comp : forall (a b c : Type) (f : b -> c) (g : a -> b),

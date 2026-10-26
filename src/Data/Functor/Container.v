@@ -1,3 +1,16 @@
+(*
+Containers (Abbott–Altenkirch–Ghani style): a shape Shape and positions
+Position : Shape → Type; a value is {shape; getter : Position shape → a}.
+Guarantees strict positivity (finitely many positions). Also CFree —
+a free-monad-like inductive over the same shape/position data.
+
+--------
+容器（Abbott–Altenkirch–Ghani 风格）：形状 Shape 与位置
+Position : Shape → Type；值是 {shape; getter : Position shape → a}。
+保证严格正性（位置有限）。另有 CFree——
+在同一形状/位置数据上的类自由单子归纳型。
+*)
+
 Require Import Hask.Prelude.
 Require Import Control.Monad.
 Require Import Control.Comonad.
@@ -7,27 +20,20 @@ Set Primitive Projections.
 Set Universe Polymorphism.
 Unset Transparent Obligations.
 
-(* A container takes a set of shapes {S] and a family of types {P] indexed by
-   {S]. Using these two, we may construct a box for one such shape {x : S]
-   along with a function (unnamed, but let's call it {f]) that, given some
-   "index" {i : P x], yields the contained element corresponding to {i], of
-   type {a].
+(*
+A container takes shapes {S} and a family {P} indexed by {S}.
+For one shape {x : S}, getter {f : P x → a} yields elements.
+Example — lists: S = nat, P n = Fin n, getter ≅ Vector n a.
+Any type representable as a container is strictly positive.
 
-   For example, the shape of a list of type {list a] may be described by its
-   length {n : nat], along with an accessor of type {Fin n -> a]. Thus:
+--------
+容器取形状集 {S} 与族 {P}（由 {S} 索引）。
+对某一形状 {x : S}，getter {f : P x → a} 给出元素。
+例——列表：S = nat，P n = Fin n，getter ≅ Vector n a。
+凡可表为容器的类型必严格正。
+*)
 
-     S = nat
-     P = forall n : S, Fin n
-     x : S
-     f : P x -> a := fun (i : P x) => nth i <some Vector x a>
-
-   The accessor in this case need not be a closure over {Vector x a], but is
-   always isomorphic to it.
-
-   The benefit of this abstraction is that any type representable as a
-   container must be strictly positive, since its elements are demonstrably
-   finite (its use is contingent on the inhabitants of {S] and {P x]). *)
-
+(* Record: shape + position→element map. / 记录：形状 + 位置→元素。 *)
 Record Container `(Position : Shape -> Type) (a : Type) := {
     shape  : Shape;
     getter : Position shape -> a
@@ -37,6 +43,7 @@ Arguments shape  {Shape Position a} _.
 Arguments getter {Shape Position a} _ _.
 
 #[export]
+(* fmap: keep shape, postcompose getter. / fmap：保留形状，后接 getter。 *)
 Program Instance Container_Functor {S : Type} (P : S -> Type) :
   Functor (Container P) := {
   fmap := fun X Y f x =>
@@ -67,6 +74,7 @@ Program Instance Container_Functor {S : Type} (P : S -> Type) :
 (*      |} *)
 (* }. *)
 
+(* Identity container: one trivial position. / 恒等容器：一个平凡位置。 *)
 Definition IdentityContainer `(x : a) : Container (const unit) a :=
   {| shape  := tt
    ; getter := const x
@@ -85,6 +93,9 @@ Program Instance IdentityContainer_Monad :
   join := fun _ x => getter x tt
 }.
 
+(* Free monad over a container signature (shape + positions).
+   --------
+   容器签名（形状 + 位置）上的自由单子。 *)
 Inductive CFree {S : Type} (P : S -> Type) (a : Type) : Type :=
   | CPure : a -> CFree P a
   | CJoin : forall s : S, (P s -> CFree P a) -> CFree P a.
@@ -118,6 +129,7 @@ Program Instance CFree_Monad {S : Type} (P : S -> Type) : Monad (CFree P) := {
   join := fun _ => CFree_bind id
 }.
 
+(* Catamorphism / fold of CFree. / CFree 的折叠（catamorphism）。 *)
 Fixpoint fold `(r : x -> y) {S : Type} `(c : forall s : S, (P s -> y) -> y)
   (fr : CFree P x) : y :=
   match fr with
@@ -125,6 +137,7 @@ Fixpoint fold `(r : x -> y) {S : Type} `(c : forall s : S, (P s -> y) -> y)
     | CJoin s k => c s $ fun t => fold r c (k t)
   end.
 
+(* Retract into an algebra on shapes. / 收回到形状上的代数。 *)
 Fixpoint retract {S : Type} `(fr : CFree P a) :
   (forall s : S, (P s -> a) -> a) -> a :=
   fun c => match fr with
