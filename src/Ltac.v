@@ -1,3 +1,13 @@
+(*
+Shared Ltac helpers and composition: inv / contra / invert, \o / comp laws,
+Case/SCase markers (Software Foundations style). Large SSR-oriented
+breakup/ordered/match_all block is commented out below.
+--------
+共享 Ltac 与函数复合：inv / contra / invert、\o 与复合律、
+Case/SCase 分案标记（Software Foundations 风格）。
+下方大段 SSR 向的 breakup/ordered/match_all 已注释掉。
+*)
+
 Require Import Coq.micromega.Lia.
 
 Set Implicit Arguments.
@@ -5,8 +15,11 @@ Unset Strict Implicit.
 Unset Printing Implicit Defensive.
 Generalizable All Variables.
 
+(* inv: inversion; subst; simpl; clear. / inv：inversion 后 subst、simpl、清除。 *)
 Ltac inv H  := inversion H; subst; simpl; clear H.
+(* contra: intro then contradiction. / contra：引入后 contradiction。 *)
 Ltac contra := intros top; contradiction top; clear top.
+(* invert / invert as: intro + inversion (+ pattern); clear. / 引入后 inversion（可带模式）再清除。 *)
 Ltac invert := intros top; inversion top; clear top.
 
 Tactic Notation "invert" "as" simple_intropattern(pat) :=
@@ -15,6 +28,7 @@ Tactic Notation "invert" "as" simple_intropattern(pat) :=
 Lemma ltn_leq_trans : forall n m p : nat, m < n -> n <= p -> m < p.
 Proof. intros. lia. Qed.
 
+(* comp / \o : function composition (f \o g) x = f (g x). / 函数复合。 *)
 Definition comp {a b c} (f : b -> c) (g : a -> b) (x : a) : c := f (g x).
 Arguments comp {a b c} f g x /.
 
@@ -40,12 +54,25 @@ Theorem uncompose : forall {A B C} (f : B -> C) (g : A -> B) (x : A) (y : C),
   (f \o g) x = f (g x).
 Proof. reflexivity. Qed.
 
+(* uncompose k: rewrite to expose k under composition. / 把复合打开以露出 k。 *)
 Ltac uncompose k :=
   rewrite <- (uncompose k);
   repeat (rewrite <- comp_assoc).
 
+(* const x _ = x / 常值函数（与 Prelude 同名约定） *)
 Definition const {A B : Type} (x : A) : B -> A := fun _ => x.
 
+(*
+Commented SSR helpers (need eqType / ssreflect in scope):
+breakup — split && / || / chained < <= hyps;
+ordered — normalize inequalities then omega;
+undoubled / match_all — double/nat and List.Forall ↔ all.
+--------
+已注释的 SSR 辅助（需 eqType / ssreflect 在作用域内）：
+breakup — 拆 && / || / 链式 < <=；
+ordered — 规范化不等式后 omega；
+undoubled / match_all — 倍元与 List.Forall ↔ all。
+*)
 (*
 Ltac breakup :=
   repeat match goal with
@@ -193,6 +220,7 @@ Ltac match_all :=
   end.
 *)
 
+(* Case / SCase / …: named case markers (SF textbook style). / 命名分案标记（SF 教材风格）。 *)
 Ltac move_to_top x :=
   match reverse goal with
   | H : _ |- _ => try move x after H

@@ -32,7 +32,7 @@ Set Extraction AutoInline.
 Set Extraction Optimize.
 Set Extraction AccessOpaque.
 
-(* Ssr *)
+(* Ssr / ssreflect-related inductives → Haskell. / SSR 相关归纳型 → Haskell。 *)
 
 Extract Inductive unit    => "()" [ "()" ].
 Extract Inductive bool    => "Prelude.Bool" ["Prelude.True" "Prelude.False"].

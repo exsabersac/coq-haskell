@@ -1,3 +1,13 @@
+(*
+[research] Category-level Functor (between Categories), natural
+transformations, adjunctions, monoidal sketches. Much larger CT draft
+than the Type→Type Functor in src/. Not in _CoqProject.
+--------
+【research / 实验草稿，未入 _CoqProject】
+范畴间 Functor、自然变换、伴随、幺半草图等。
+比 src/ 里 Type→Type Functor 大得多的范畴论草稿。
+*)
+
 Require Export Category.
 
 Close Scope nat_scope.
@@ -16,8 +26,11 @@ Class Functor {C : Category} {D : Category} :=
 
 Notation "C ⟶ D" := (@Functor C D) (at level 90, right associativity).
 
-(* Functors used as functions will map objects of categories, similar to the
-   way type constructors behave in Haskell. *)
+(*
+Functors used as functions map objects of categories, like Haskell type constructors.
+--------
+把 Functor 当函数用时映射范畴对象，类似 Haskell 类型构造器。
+*)
 Coercion fobj : Functor >-> Funclass.
 
 (* jww (2014-08-11): Have the ∘ symbol refer to morphisms in any category, so

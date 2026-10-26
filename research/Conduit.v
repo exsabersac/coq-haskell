@@ -1,12 +1,25 @@
+(*
+[research] Source wrapper over Cont / EitherT — Haskell conduit-style
+streaming sketch (Functor/Applicative/Monad instances). Not in _CoqProject.
+--------
+【research / 实验草稿，未入 _CoqProject】
+在 Cont / EitherT 上的 Source 包装——Haskell conduit 风格流式草稿
+（含 F/A/M 实例）。
+*)
+
 Require Export Cont.
 Require Export EitherT.
 Require Export Trans.
 Require Category.
 
-(* A type-wrapper is not strictly necessary here, since the Functor,
-   Applicative and Monad behaviors are all directly based on Cont.  In Haskell
-   it is needed, so we match that behavior here, to prove that nothing is
-   violated owing to the wrapping.
+(*
+A type-wrapper is not strictly necessary here, since the Functor,
+Applicative and Monad behaviors are all directly based on Cont.  In Haskell
+it is needed, so we match that behavior here, to prove that nothing is
+violated owing to the wrapping.
+--------
+此处类型包装并非严格必要（F/A/M 行为直接基于 Cont）；
+Haskell 需要包装，这里对齐以证明包装不破坏定律。
 *)
 Inductive Source (M : Type -> Type) (R : Type) (A : Type) : Type :=
   Source_ : Cont (R -> EitherT R M R) A -> Source M R A.
@@ -232,21 +245,16 @@ Defined.
 (*
 Require Export Category.
 
-(* Src is the category of simple-conduit Sources:
-
-   Objects are sources
-   Morphisms are the source homomorphisms (aka conduits)
-
-   Identity is just simple identity
-   Composition is just simple composition, since monadic folds
-     are simply functions modulo type wrapping.
-
-   Thus, the proof are extremely trivial and follow immediately from the
-   definitions.
-
-   Another way to say it is that since, by naturality, the image of a functor
-   is always a sub-category in its codomain, and since Sources are functors,
-   they must also then be categories.
+(*
+Src is the category of simple-conduit Sources:
+  Objects = sources; Morphisms = source homs (conduits);
+  Id / compose = ordinary (monadic folds are functions modulo wrapping).
+  Proofs are trivial from the defs; equivalently, the image of a functor
+  is a subcategory, and Sources are functors.
+--------
+Src：simple-conduit 的 Source 范畴——对象为 source，态射为 conduit；
+恒等/复合即普通复合（单子折叠差一层类型包装）。
+证明由定义直接得出；或说函子像总是子范畴，而 Source 是函子。
 *)
 #[export]
 Instance Src {M : Type -> Type} `{Monad M} {R}

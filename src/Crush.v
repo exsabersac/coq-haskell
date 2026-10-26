@@ -7,6 +7,17 @@
  *   http://creativecommons.org/licenses/by-nc-nd/3.0/
  *)
 
+(*
+CPDT-style automation (Adam Chlipala): inject / simplHyp / inster / crush'
+and the thin wrapper [crush]. Used by early research / Category drafts;
+not the main ssreflect path of src/*.
+
+--------
+来自 CPDT 的自动化战术包（Adam Chlipala）：inject / simplHyp / inster / crush'
+及薄封装 [crush]。早期 research / Category 草稿会用到；
+不是本仓 src 主路径上的 ssreflect 风格。
+*)
+
 Require Import Coq.Logic.Eqdep Coq.Lists.List.
 
 Require Import Coq.micromega.Lia.
@@ -14,16 +25,28 @@ Require Import Coq.micromega.Lia.
 Set Implicit Arguments.
 Generalizable All Variables.
 
-(** A version of [injection] that does some standard simplifications afterward: clear the hypothesis in question, bring the new facts above the double line, and attempt substitution for known variables. *)
+(*
+inject H: injection + clear H + intros + try subst.
+--------
+inject H：injection 后清假设、引入新事实并尝试 subst。
+*)
 Ltac inject H := injection H; clear H; intros; try subst.
 
-(** Try calling tactic function [f] on all hypotheses, keeping the first application that doesn't fail. *)
+(*
+appHyps f: try f on each hypothesis; keep first success.
+--------
+appHyps f：对每个假设试 f，保留首次成功。
+*)
 Ltac appHyps f :=
   match goal with
     | [ H : _ |- _ ] => f H
   end.
 
-(** Succeed iff [x] is in the list [ls], represented with left-associated nested tuples. *)
+(*
+inList x ls: succeed iff x appears in left-nested tuple-list ls.
+--------
+inList x ls：x 是否出现在左结合嵌套元组列表 ls 中。
+*)
 Ltac inList x ls :=
   match ls with
     | x => idtac
@@ -31,14 +54,22 @@ Ltac inList x ls :=
     | (?LS, _) => inList x LS
   end.
 
-(** Try calling tactic function [f] on every element of tupled list [ls], keeping the first call not to fail. *)
+(*
+app f ls: try f on each element of tupled list; first success wins.
+--------
+app f ls：对元组列表各元素试 f，首次成功即停。
+*)
 Ltac app f ls :=
   match ls with
     | (?LS, ?X) => f X || app f LS || fail 1
     | _ => f ls
   end.
 
-(** Run [f] on every element of [ls], not just the first that doesn't fail. *)
+(*
+all f ls: run f on every element of ls (must all succeed).
+--------
+all f ls：对 ls 每个元素都跑 f（全部须成功）。
+*)
 Ltac all f ls :=
   match ls with
     | (?LS, ?X) => f X; all f LS
@@ -46,8 +77,11 @@ Ltac all f ls :=
     | _ => f ls
   end.
 
-(** Workhorse tactic to simplify hypotheses for a variety of proofs.
-   * Argument [invOne] is a tuple-list of predicates for which we always do inversion automatically. *)
+(*
+simplHyp invOne: simplify hyps; auto-invert predicates listed in invOne.
+--------
+simplHyp invOne：化简假设；对 invOne 中列出的谓词自动 inversion。
+*)
 Ltac simplHyp invOne :=
   (** Helper function to do inversion on certain hypotheses, where [H] is the hypothesis and [F] its head symbol *)
   let invert H F :=
@@ -99,24 +133,39 @@ Ltac simplHyp invOne :=
     | [ H : Some _ = Some _ |- _ ] => injection H; clear H
   end.
 
-(** Find some hypothesis to rewrite with, ensuring that [auto] proves all of the extra subgoals added by [rewrite]. *)
+(*
+rewriteHyp: rewrite with some hyp; auto must close rewrite side goals.
+--------
+rewriteHyp：用某条假设改写；副目标须能被 auto 关掉。
+*)
 Ltac rewriteHyp :=
   match goal with
     | [ H : _ |- _ ] => rewrite H by solve [ auto ]
   end.
 
-(** Combine [autorewrite] with automatic hypothesis rewrites. *)
+(*
+rewriterP / rewriter: autorewrite + rewriteHyp loop.
+--------
+rewriterP / rewriter：autorewrite 与假设改写的组合循环。
+*)
 Ltac rewriterP := repeat (rewriteHyp; autorewrite with core in *).
 Ltac rewriter := autorewrite with core in *; rewriterP.
 
-(** This one is just so darned useful, let's add it as a hint here. *)
+(* app_ass as rewrite hint / 把 app_ass 放进 rewrite hint *)
 #[export] Hint Rewrite app_ass : core.
 
-(** Devious marker predicate to use for encoding state within proof goals *)
+(*
+done: marker Prop to encode inster's instantiation trace in the goal.
+--------
+done：在目标上下文里编码 inster 实例化轨迹的标记谓词。
+*)
 Definition done (T : Type) (x : T) := True.
 
-(** Try a new instantiation of a universally quantified fact, proved by [e].
-   * [trace] is an accumulator recording which instantiations we choose. *)
+(*
+inster e trace: instantiate foralls in e; trace avoids repeating choices.
+--------
+inster e trace：对 e 中全称量词做实例化；trace 避免重复同一选择。
+*)
 Ltac inster e trace :=
   (** Does [e] have any quantifiers left? *)
   match type of e with
@@ -159,7 +208,11 @@ Ltac inster e trace :=
       end
   end.
 
-(** After a round of application with the above, we will have a lot of junk [done] markers to clean up; hence this tactic. *)
+(*
+un_done: clear leftover [done _] marker hypotheses.
+--------
+un_done：清掉残留的 [done _] 标记假设。
+*)
 Ltac un_done :=
   repeat match goal with
            | [ H : done _ |- _ ] => clear H
@@ -167,9 +220,11 @@ Ltac un_done :=
 
 Require Import JMeq.
 
-(** A more parameterized version of the famous [crush].  Extra arguments are:
-   * - A tuple-list of lemmas we try [inster]-ing 
-   * - A tuple-list of predicates we try inversion for *)
+(*
+crush' lemmas invOne: parameterized crush — inster lemmas + invert invOne.
+--------
+crush' lemmas invOne：参数化 crush——对 lemmas 做 inster、对 invOne 做 inversion。
+*)
 Ltac crush' lemmas invOne :=
   (** A useful combination of standard automation *)
   let sintuition := simpl in *; intuition; try subst;
@@ -201,15 +256,22 @@ Ltac crush' lemmas invOne :=
       (** End with a last attempt to prove an arithmetic fact with [lia], or prove any sort of fact in a context that is contradictory by reasoning that [lia] can do. *)
       try lia; try (elimtype False; lia)).
 
-(** [crush] instantiates [crush'] with the simplest possible parameters. *)
+(*
+crush: crush' false fail — default no lemmas / no auto-invert list.
+--------
+crush：crush' false fail——默认无引理列表、无自动 inversion 谓词。
+*)
 Ltac crush := crush' false fail.
 
-(** * Wrap Program's [dependent destruction] in a slightly more pleasant form *)
-
+(*
+dep_destruct E: remember + dependent destruction + try rewrite back.
+Wraps Program.Equality for friendlier use inside Ltac matches.
+--------
+dep_destruct E：remember + dependent destruction，并尝试写回。
+对 Program.Equality 的薄封装，便于在 Ltac match 里使用。
+*)
 Require Import Program.Equality.
 
-(** Run [dependent destruction] on [E] and look for opportunities to simplify the result.
-   The weird introduction of [x] helps get around limitations of [dependent destruction], in terms of which sorts of arguments it will accept (e.g., variables bound to hypotheses within Ltac [match]es). *)
 Ltac dep_destruct E :=
   let x := fresh "x" in
     remember E as x; simpl in x; dependent destruction x;
@@ -217,14 +279,21 @@ Ltac dep_destruct E :=
             | [ H : _ = E |- _ ] => try rewrite <- H in *; clear H
           end.
 
-(** Nuke all hypotheses that we can get away with, without invalidating the goal statement. *)
+(*
+clear_all: clear every hypothesis that can be cleared without breaking the goal.
+--------
+clear_all：在不破坏目标的前提下尽量清掉所有假设。
+*)
 Ltac clear_all :=
   repeat match goal with
            | [ H : _ |- _ ] => clear H
          end.
 
-(** Instantiate a quantifier in a hypothesis [H] with value [v], or, if [v] doesn't have the right type, with a new unification variable.
-   * Also prove the lefthand sides of any implications that this exposes, simplifying [H] to leave out those implications. *)
+(*
+guess v H: specialize H with v (or evar); auto-prove Prop premises.
+--------
+guess v H：用 v（或 evar）特化 H；Prop 前提尽量 eauto 消掉。
+*)
 Ltac guess v H :=
   repeat match type of H with
            | forall x : ?T, _ =>
@@ -244,7 +313,11 @@ Ltac guess v H :=
              end
          end.
 
-(** Version of [guess] that leaves the original [H] intact *)
+(*
+guessKeep v H: like guess, but keep original H (work on a copy).
+--------
+guessKeep v H：同 guess，但保留原假设 H（在副本上操作）。
+*)
 Ltac guessKeep v H :=
   let H' := fresh "H'" in
     generalize H; intro H'; guess v H'.

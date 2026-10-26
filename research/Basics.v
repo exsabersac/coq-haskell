@@ -1,3 +1,11 @@
+(*
+[research] Axioms (prop extensionality, proof irrelevance) and a tiny
+simple_solver Ltac. Experimental — not in _CoqProject.
+--------
+【research / 实验草稿，未入 _CoqProject】
+命题外延、proof irrelevance 公理，以及简单的 simple_solver Ltac。
+*)
+
 Require Export FunctionalExtensionality.
 
 Set Primitive Projection.
@@ -6,7 +14,7 @@ Axiom propositional_extensionality : forall P : Prop, P -> P = True.
 Axiom propositional_extensionality_rev : forall P : Prop, P = True -> P.
 Axiom proof_irrelevance : forall (P : Prop) (u v : P), u = v.
 
-(* Commonly occurring patterns that can now be solved with 'auto'. *)
+(* Patterns solvable by auto. / 常见可被 auto 解决的模式。 *)
 #[export] Hint Extern 4 (?A = ?A) => reflexivity : core.
 #[export] Hint Extern 7 (?X = ?Z) =>
   match goal with

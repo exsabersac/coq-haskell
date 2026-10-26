@@ -1,3 +1,13 @@
+(*
+[research] Applicative with laws inside the class (identity, composition,
+homomorphism, interchange). Predecessor of src/Control/Applicative.v.
+Not in _CoqProject.
+--------
+【research / 实验草稿，未入 _CoqProject】
+Applicative，定律写在类内（identity / composition / homomorphism / interchange）。
+src/Control/Applicative.v 的前身。
+*)
+
 Require Export Endo.
 Require Import Tuple.
 Require Import Coq.Lists.List.

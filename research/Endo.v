@@ -1,10 +1,24 @@
+(*
+[research] Endofunctors on Type→Type: Functor + laws in the class,
+Natural / Full / Faithful. Early draft; production API is src/Data/Functor.v
+(laws split out). Not in _CoqProject.
+--------
+【research / 实验草稿，未入 _CoqProject】
+Type→Type 自函子：Functor（定律写进类）、Natural / Full / Faithful。
+早期草稿；正式 API 见 src/Data/Functor.v（定律拆出）。
+*)
+
 Require Export Basics.
 
 Generalizable All Variables.
 
-(* Even though we have the Category class in Category.v, the Functors
-   and Monads I'm interested in reasoning about are all endofunctors on
-   Coq, so there is no reason to carry around that extra machinery. *)
+(*
+Even though we have the Category class in Category.v, the Functors
+and Monads I'm interested in reasoning about are all endofunctors on
+Coq, so there is no reason to carry around that extra machinery.
+--------
+虽有 Category.v，这里关心的 F/M 都是 Coq 上的自函子，不必背整套范畴机器。
+*)
 
 Class Functor (F : Type -> Type) :=
 { fobj := F

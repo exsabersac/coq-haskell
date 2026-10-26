@@ -1,3 +1,13 @@
+(*
+[research] Bisimulation via approx/embed; coinductive streams and
+CoProxy / pushR·pullR experiments (pipes-style). Incomplete drafts
+commented out. Not in _CoqProject.
+--------
+【research / 实验草稿，未入 _CoqProject】
+用 approx/embed 做双模拟；余归纳 stream 与 CoProxy / pushR·pullR
+（pipes 风格）实验；多段未完成代码已注释。
+*)
+
 Require Import Hask.Prelude.
 
 Generalizable All Variables.
