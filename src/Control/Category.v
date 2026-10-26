@@ -14,6 +14,20 @@ Set Transparent Obligations.
  *   http://creativecommons.org/licenses/by-nc-nd/3.0/
  *)
 
+(*
+Tutorial-style Category on Type: objects, hom (~>), id, compose with laws.
+Defines sections/retractions, epic/monic, Isomorphism, Groupoid, Sets,
+and Opposite (C^op). Pedagogical CT sketch — day-to-day F/A/M instances
+do NOT hang on this Category. Uses axioms propositional_extensionality
+and proof_irrelevance.
+
+--------
+教程风 Category（对象在 Type）：对象、hom（~>）、id、复合及定律。
+含 section/retraction、epic/monic、Isomorphism、Groupoid、Sets、
+以及对偶范畴 C^op。偏教学的 CT 草图 — 日常 F/A/M 实例不挂在此 Category 上。
+使用公理 propositional_extensionality 与 proof_irrelevance。
+*)
+
 (** %\chapter{Category}% *)
 
 Require Import Hask.Prelude.
@@ -29,16 +43,12 @@ Set Primitive Projections.
 Set Universe Polymorphism.
 (* Unset Transparent Obligations. *)
 
-(** * Category *)
+(*
+* Category — "the algebra of abstract functions" (Awodey): objects + morphisms.
 
-(** Category theory is a language for reasoning about abstractions.
-Awodey%\cite{Awodey}% calls it, "the algebra of abstract functions."  Its
-power lies in relating ideas from differing disciplines, and unifying them
-under a common framework.
-
-At its heart we have the [Category].  Every category is characterized by
-its objects, and the morphisms (also called arrows) between those
-objects. *)
+--------
+* 范畴 — 「抽象函数的代数」（Awodey）：对象 + 态射。
+*)
 
 (* begin hide *)
 Reserved Notation "a ~> b" (at level 70, right associativity).
@@ -52,39 +62,26 @@ Class Category := {
     (* uhom := Type : Type; *)
     (* hom  : ob → ob → uhom where "a ~> b" := (hom a b); *)
     hom  : ob → ob → Type where "a ~> b" := (hom a b);
-(**
+(*
+Objects/arrows carry no inherent meaning — they only distinguish morphisms;
+morphisms characterize objects. [hom] = Hom-set; [uhom] (commented) for
+universe polymorphism when categories are objects.
 
-It is important to note that objects and arrows have no inherent meaning: The
-notion of a category requires only that they exist, and that they be
-well-behaved.  Since all we can know about objects is that they exist, they
-serve only to differentiate morphisms.  Conversely, morphisms are how we
-characterize objects. *)
-
-(** * Morphisms
-
-In this formalization, as in many textbooks, morphisms are called [hom], for
-"homomorphism" (algebraic structure-preserving maps).  Each morphism
-represents the set of all morphism having that type, so they are also called
-"hom-sets".
-
-Since categories may have other categories as objects, we require that the
-type of [hom] be larger than the type of its arguments.  This is the purpose
-of the [uhom] type, allowing us to make use of Coq's support for universe
-polymorphism.
-
+--------
+对象/箭头本身无固有含义 — 仅区分态射；态射刻画对象。
+[hom] 即 Hom-集；[uhom]（已注释）用于范畴作对象时的宇宙多态。
 *)
+
+(* * Morphisms / * 态射 *)
 
     c_id : ∀ {A}, A ~> A;
     c_comp : ∀ {A B C}, (B ~> C) → (A ~> B) → (A ~> C)
       where "f ∘ g" := (c_comp f g);
-(**
+(*
+[id] / [compose] are the verbs; three laws: left/right identity, associativity.
 
-If [ob] and [hom] are the nouns of category theory, [id] and [compose] are its
-fundamental verbs.  Using only these notions we can reason about concepts such
-as _idempotency_, _involution_, _section_ and _retraction_, _equalizers_ and
-_co-equalizers_, and more.  Before we may do so, however, we must constrain
-identity and composition under three laws:
-
+--------
+[id] / [compose] 是动词；三定律：左/右单位、结合律。
 *)
 
     c_right_id : ∀ A B (f : A ~> B), f ∘ c_id = f;
@@ -93,11 +90,9 @@ identity and composition under three laws:
         f ∘ (g ∘ h) = (f ∘ g) ∘ h
 }.
 
-(**
-
-Note the difference between the arrow used for function types in Coq, such as
-[A → B], and for morphisms in a category [A ~> B].  If the category must be
-indicated, it is stated in the arrow: [A ~{C}~> B]. *)
+(* Coq function arrow A → B vs categorical A ~> B (or A ~{C}~> B)
+   --------
+   Coq 函数箭头 A → B 与范畴态射 A ~> B（或 A ~{C}~> B） *)
 
 (* begin hide *)
 (* Using a [Category] in a context requiring a [Type] will do what is expected
@@ -156,12 +151,7 @@ Qed.
 
 (* end hide *)
 
-(**
-
-We may now extend our discourse about functions, using only the few terms
-we've defined so far:
-
-*)
+(* Morphisms derived from id/compose / 由 id/compose 导出的态射性质 *)
 
 (* begin hide *)
 Section Morphisms.
@@ -171,11 +161,7 @@ Context `{C : Category}.
 Definition Idempotent `(f : X ~> X) := f ∘ f = f.
 Definition Involutive `(f : X ~> X) := f ∘ f = c_id.
 
-(**
-
-We can also define relationships between two functions:
-
-*)
+(* Section' / Retraction / SplitIdempotent / Section'、Retraction、分裂幂等 *)
 
 Definition Section'   `(f : X ~> Y) := { g : Y ~> X & g ∘ f = c_id }.
 Definition Retraction `(f : X ~> Y) := { g : Y ~> X & f ∘ g = c_id }.
@@ -190,13 +176,9 @@ Class SplitIdempotent {X Y : C} := {
     split_idem_law_2 : split_idem_r ∘ split_idem_s = id/Y
 }.
 
-(**
-
-A Σ-type (sigma type) is used to convey [Section'] and [Retraction] to make
-the witness available to proofs.  The definition could be expressed with an
-existential quantifier (∃), but it would not convey which [g] was chosen.
-
-*)
+(* Σ-type keeps the witness g (∃ would hide it)
+   --------
+   用 Σ 保留见证 g（∃ 会藏掉） *)
 
 Definition Epic  `(f : X ~> Y) := ∀ Z (g1 g2 : Y ~> Z), g1 ∘ f = g2 ∘ f → g1 = g2.
 Definition Monic `(f : X ~> Y) := ∀ Z (g1 g2 : Z ~> X), f ∘ g1 = f ∘ g2 → g1 = g2.
@@ -205,10 +187,7 @@ Definition Bimorphic `(f : X ~> Y) := Epic f ∧ Monic f.
 Definition SplitEpi  `(f : X ~> Y) := Retraction f.
 Definition SplitMono `(f : X ~> Y) := Section' f.
 
-(**
-
-The only morphism we've seen so far is [id], but we can trivially prove it is
-both _idempotent_ and _involutive_. *)
+(* id is Idempotent and Involutive / id 既幂等又对合 *)
 
 (* begin hide *)
 Hint Unfold Idempotent : core.
@@ -228,9 +207,7 @@ Proof. auto. Qed.
 Lemma id_involutive : ∀ X, Involutive (c_id (A := X)).
 Proof. auto. Qed.
 
-(**
-
-We can also prove some relationships among these definitions. *)
+(* Retraction ⇒ Epic; Section' ⇒ Monic / 收缩⇒满；截影⇒单 *)
 
 (* begin hide *)
 Section Lemmas.
@@ -285,13 +262,11 @@ Proof.
   repeat (rewrite c_comp_assoc); auto.
 Qed.
 
-(** * Isomorphism
+(*
+* Isomorphism — to / from with to∘from = id and from∘to = id
 
-An isomorphism is a pair of mappings that establish an equivalence between
-objects.  Using the language above, it is a pair of functions which are both
-sections and retractions of one another.  That is, they compose to identity in
-both directions:
-
+--------
+* 同构 — to / from，双向复合为 id
 *)
 
 Class Isomorphism `{C : Category} (X Y : C) := {
@@ -323,28 +298,18 @@ Proof.
 Qed.
 (* end hide *)
 
-(**
-
-Typically isomorphisms are characterized by this pair of functions, but they
-can also be expressed as an equivalence between objects using the notation [A
-≅ B].  A double-tilde is used to express the same notion of equivalence
-between value terms [a = b].
-
-*)
+(* Object iso X {≅} Y; value-level x {≡} y
+   --------
+   对象同构 X {≅} Y；值级 x {≡} y *)
 
 Notation "X {≅} Y" :=
   (Isomorphism X Y) (at level 70, right associativity) : category_scope.
 Notation "x {≡} y" :=
   (to x = y ∧ from y = x) (at level 70, right associativity).
 
-(**
-
-[id] witnesses the isomorphism between any object and itself.  Isomorphisms
-are likewise symmetric and transitivity, making them parametric relations.
-This will allows us to use them in proof rewriting as though they were
-equalities.
-
-*)
+(* Iso: identity, symmetry, transitivity (parametric relation)
+   --------
+   同构：恒等、对称、传递（参数关系，可改写） *)
 
 Program Definition iso_identity `{C : Category} (X : C) : X {≅} X := {|
     to   := id/X;
@@ -432,12 +397,7 @@ Add Parametric Relation `(C : Category) (a b : C) : (a ≅ b) (@iso_equiv C a b)
 Defined.
 *)
 
-(**
-
-A [Groupoid] is a [Category] where every morphism has an inverse, and is
-therefore an isomorphism.
-
-*)
+(* Groupoid: every morphism is an iso / Groupoid：每个态射皆同构 *)
 
 Program Definition Groupoid `(C : Category) : Category := {|
     ob      := @ob C;
@@ -474,12 +434,9 @@ Next Obligation.
 Qed.
 (* end hide *)
 
-(**
-
-A function which is both a retraction and monic, or a section and epic, bears
-an isomorphism with its respective witness.
-
-*)
+(* Monic+Retraction or Epic+Section' ⇒ Isomorphism
+   --------
+   单+收缩 或 满+截影 ⇒ 同构 *)
 
 Program Definition Monic_Retraction_Iso `{C : Category}
   `(f : X ~{C}~> Y) (r : Retraction f) (m : Monic f) : X {≅} Y := {|
@@ -543,12 +500,7 @@ Qed.
 #[export] Hint Unfold SplitMono : core.
 (* end hide *)
 
-(**
-
-A section may be flipped using its witness to provide a retraction, and
-vice-versa.
-
-*)
+(* flip Section' ↔ Retraction / 截影与收缩互翻 *)
 
 Definition flip_section `{Category} `(f : X ~> Y)
   (s : @Section' _ X Y f) : @Retraction _ Y X (projT1 s).
@@ -568,18 +520,11 @@ Proof.
   crush.
 Qed.
 
-(** * Sets
+(*
+* Sets — objects = Type; morphisms = functions. Named Sets (not Set) to avoid clash.
 
-[Sets] is our first real category: the category of Coq types and functions.
-The objects of this category are all the Coq types (including [Set], [Prop]
-and [Type]), and its morphisms are functions from [Type] to [Type].  [id]
-simply returns whatever object is passed, and [compose] is regular composition
-between functions.  Proving it is a category in Coq is automatic.
-
-Note that in many textbooks this category (or one similar to it) is called
-just [Set], but since that name conflicts with types of the same name in Coq,
-the plural is used instead.
-
+--------
+* Sets（集合范畴）— 对象 = Type；态射 = 函数。称 Sets（非 Set）以免与 Coq 冲突。
 *)
 
 Program Definition Sets : Category := {|
@@ -588,13 +533,9 @@ Program Definition Sets : Category := {|
     c_id   := fun _ x => x;
     c_comp := fun _ _ _ f g x => f (g x)
 |}.
-(**
-
-Within the category of [Sets] we can prove that monic functions are injective,
-and epic functions are surjective.  This is not necessarily true in other
-categories.
-
-*)
+(* In Sets: Monic ↔ Injective, Epic ↔ Surjective
+   --------
+   在 Sets 中：单 ↔ 单射，满 ↔ 满射（他范畴未必） *)
 
 Notation "X ≅Sets Y" :=
   (@Isomorphism Sets X Y) (at level 70, right associativity) : category_scope.
@@ -639,13 +580,11 @@ Proof.
     exists x. reflexivity.
 Qed.
 
-(** * Dual Category
+(*
+* Dual Category — C^op flips morphisms; (C^op)^op = C (involutive)
 
-The opposite, or dual, of a category is expressed [C^op].  It has the same
-objects as its parent, but the direction of all morphisms is flipped.  Doing
-this twice should result in the same category, making it an involutive
-operation.
-
+--------
+* 对偶范畴 — C^op 翻转态射方向；(C^op)^op = C（对合）
 *)
 
 Program Definition Opposite `(C : Category) : Category := {|
@@ -676,12 +615,7 @@ Proof.
   extensionality h. crush.
 Qed.
 
-(**
-
-Using the functions [op] and [unop], we can "flip" a particular morphism by
-mapping to its corresponding morphism in the dual category.
-
-*)
+(* op / unop flip a single morphism / op、unop：翻转单个态射 *)
 
 Definition op `{C : Category} : ∀ {X Y}, (X ~{C^op}~> Y) → (Y ~{C}~> X).
 Proof. auto. Defined.
