@@ -1,4 +1,4 @@
-> 中文说明见 [README.zh-CN.md](./README.zh-CN.md)。
+> 中文说明见 [README.zh-CN.md](./README.zh-CN.md)。ssreflect 简要（中文）：[docs/SSR.zh-CN.md](./docs/SSR.zh-CN.md)。
 
 coq-haskell
 ===========

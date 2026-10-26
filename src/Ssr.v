@@ -1,3 +1,13 @@
+(*
+  EN: Thin re-export of ssreflect / ssrfun / ssrbool, plus tiny helpers
+  (decide, prop). This is the library's SSR entrypoint — tactic style,
+  not the full MathComp stack.
+  --------
+  中文：统一导出 ssreflect / ssrfun / ssrbool，并附带小工具（decide、prop）。
+  本仓 SSR 入口：主要用战术风格，不是整套 MathComp。
+  说明见 docs/SSR.zh-CN.md。
+*)
+
 From Coq Require Export
   ssreflect
   ssrfun

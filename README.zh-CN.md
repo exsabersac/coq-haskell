@@ -42,6 +42,12 @@ make
 | 控制变体 | `Compose`, `Comonad`, `Lens`, 迷你 `Category` | VL Lens 等；日常 F/M 不挂在 Category 上 |
 | Monad 动物园 | `Free`/`Freer`、`Cont`/`State`、若干 `*T` | Free 归纳 vs Freer CPS；变换器 |
 
+## ssreflect（SSR）
+
+本仓证明风格基于 **ssreflect**。中文简要说明（是什么、战术对照、与本仓关系、不必先学透）：
+
+→ [docs/SSR.zh-CN.md](./docs/SSR.zh-CN.md)
+
 ## 本仓库 zh-CN 注解
 
 见 [NOTES.zh-CN.md](./NOTES.zh-CN.md)：已译文件列表、未译范围、如何继续。核心 `.v` 采用与 category-theory zh-CN 相同的中英对照注释风格（`(* EN … -------- 中文 … *)`）。

@@ -2,6 +2,9 @@
 
 ## 风格
 
+证明语言说明见 [docs/SSR.zh-CN.md](./docs/SSR.zh-CN.md)（ssreflect 简要）。
+
+
 与 category-theory 的 zh-CN 分支一致：
 
 - 块注释：`(*` 英文原意（可略压缩）→ 一行 `--------` → 中文对照 `*)`
@@ -13,6 +16,7 @@
 | 路径 | 内容 |
 |---|---|
 | `README.zh-CN.md` | 完整中文说明 |
+| `docs/SSR.zh-CN.md` | ssreflect / SSR 证明风格简要 |
 | `README.md` | 顶部增加指向中文说明的链接 |
 | `src/Prelude.v` | 文件头 + 常用组合子旁注 |
 | `src/Data/Functor.v` | 文件头、`Functor` / `FunctorLaws` |
