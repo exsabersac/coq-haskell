@@ -1,3 +1,24 @@
+(*
+Predicate / indexed functors & monads (research, Conor McBride style).
+Not the ordinary Type->Type Monad: morphisms are transp (P :-> Q) =
+forall x, P x -> Q x on families over an index set A.
+PFunctor / PMonad act on (I -> Type) -> (O -> Type).
+Path = type-aligned lists; PAssign; Atkey embedding of PMonad into
+IxFunctor/IxApplicative/IxMonad; Kleene / IAlgebra / SAlgebra sketches.
+Depends on Iso / Tuple; largely exploratory — many Admitted / WRONG marks.
+Contrast Indexed.v (Atkey I/O/value on plain Type) vs this file (predicates).
+
+--------
+谓词 / 索引函子与单子（研究向，McBride 风格）。
+不是普通 Type→Type 的 Monad：态射是 transp（P :→ Q）=
+∀ x, P x → Q x（指标集 A 上的族）。
+PFunctor / PMonad 作用于 (I → Type) → (O → Type)。
+Path = 类型对齐列表；PAssign；Atkey 把 PMonad 嵌入
+IxFunctor/IxApplicative/IxMonad；Kleene / IAlgebra / SAlgebra 草图。
+依赖 Iso / Tuple；偏探索——多 Admitted / WRONG。
+对照 Indexed.v（普通 Type 上的 Atkey I/O/值）与本文件（谓词族）。
+*)
+
 Require Export Hask.Ltac.
 Require Export Coq.Program.Equality.
 Require Export Coq.Unicode.Utf8.
@@ -39,8 +60,9 @@ Infix ":∘" := pcompose (at level 40, left associativity).
 
 Module SimpleCategory.
 
-(** This is a simple treatment of categories, useful here only for proving
-    statements from Conor's paper. *)
+(** Simple categories for lemmas from Conor's paper.
+    --------
+    简易范畴，仅用于 Conor 论文中的引理。 *)
 
 Class Category {k} (cat : k → k → Type) := {
     id : ∀ {a}, cat a a;
@@ -60,7 +82,8 @@ Program Instance Index_Category {A} : Category (@transp A) := {
 
 End SimpleCategory.
 
-(** * Predicate functors *)
+(** * Predicate functors / 谓词函子
+    PFunctor: pmap on families (X :→ Y) -> (F X :→ F Y), with id/comp laws. *)
 
 Class PFunctor {I O} (F : (I → Type) → (O → Type)) := {
     pobj := F;
@@ -93,10 +116,11 @@ Proof.
   apply proof_irrelevance.
 Qed.
 
-(** * Path *)
+(** * Path / 路径
 
-(** This is a demonstration of PFunctor, showing "type-aligned lists" as paths
-    within a graph. *)
+(** Demo of PFunctor: type-aligned lists as paths in a graph labeled by g.
+    --------
+    PFunctor 示例：以 g 为边标的图上的「类型对齐列表」路径。 *)
 
 Section Path.
 
@@ -220,6 +244,10 @@ Qed.
 
 (** * PAssign *)
 
+(** PAssign: useful constructor of indexed sets (from Conor's notes).
+    --------
+    PAssign：索引集合的常用构造（来自 Conor 笔记）。
+
 (** PAssign is "a particularly useful constructor of indexed sets, capturing
     that idea of having an element of a given type at a particular key index."
     -- Conor *)
@@ -244,6 +272,10 @@ Obligation 2.
   inversion X0; subst.
   apply X. apply X1.
 Defined.
+
+(** Path with unit indices ≅ list (when edge type is constant).
+    --------
+    指标固定为 unit 的 Path ≅ list（边类型常值时）。
 
 (** The following shows that a Path whose indices are fixed at unit is
     equivalent to a list. *)
@@ -291,9 +323,11 @@ Obligation 2.
 Qed.
 *)
 
-(** * PMonad *)
+(** * PMonad / 谓词单子
 
-(** We now show that some endo-PFunctors can also be PMonads. *)
+(** Endo-PFunctors that are also PMonads (indexed bind / return on families).
+    --------
+    同时又是 PMonad 的自函子（族上的索引 bind / return）。 *)
 
 Reserved Notation "c ?>= f" (at level 25, left associativity).
 
@@ -329,6 +363,10 @@ Notation "c =>= f" := (angbind f _ c) (at level 25, left associativity).
 Definition pjoin {I} `{m : PMonad I} {p} : m (m p) :→ m p :=
   pextend (λ (x : I) (X : m p x), X).
 
+(** Ordinary monad on indexed types → indexed monad on ordinary types (Atkey).
+    --------
+    索引类型上的普通单子 → 普通类型上的索引单子（Atkey）。
+
 (** An ordinary monad on indexed types induces an indexed monad on ordinary
     types, packaging the restricted functionality offered by the angelic
     bind. -- Conor *)
@@ -346,7 +384,7 @@ Definition ibind `{m : PMonad} {i j k a b}
 Definition iseq `{m : PMonad} {p q r} (f : p :→ m q) (g : q :→ m r)
   : p :→ m r := pextend g :∘ f.
 
-(** Paths are also PMonads. *)
+(** Paths are also PMonads. / Path 也是 PMonad。 *)
 
 Fixpoint path_join {I : Type} {g : (I * I) → Type} {i}
   (p : Path (Path g) i) : Path g i :=
@@ -401,12 +439,17 @@ Obligation 4.
   rewrite path_join_compose. reflexivity.
 Qed.
 
+(** Atkey IxFunctor / IxApplicative / IxMonad; Atkey embedding of PMonad.
+    --------
+    Atkey 风格 IxFunctor / IxApplicative / IxMonad；PMonad 的 Atkey 嵌入。
+
 (** We now formalize a notion of indexed monads ala Atkey, prove that the
     Atkey definition fulfills them, and thereafter we can trust that Atkey is
     a specialization of PMonad.  We must keep IxApplicative, however, since we
     do not have applicatives in the general case. *)
 
 Module Atkey.
+(* Atkey-style indexed F/A/M on I → O → Type → Type. / Atkey 索引 F/A/M。 *)
 
 Class IxFunctor {I O} (F : I → O → Type → Type) :=
 { ixobj := F
@@ -954,6 +997,7 @@ Qed.
 End Atkey.
 
 Module Kleene.
+(* Kleene star / free monoid sketch on shapes I ▷ O. / Kleene 星 / 自由幺半草图。 *)
 
 Record Signature (I O : Type) : Type := {
     Operations : O → Type;
@@ -1117,6 +1161,7 @@ Qed.
 End Kleene.
 
 Module IAlgebra.
+(* Indexed algebra combinators (RProd / RSum). / 索引代数组合子。 *)
 
 Inductive RProd {I} (p q r : I → Type) (i : I) :=
   mkRProd : p i → (q :→ r) → RProd p q r i.
@@ -1181,6 +1226,7 @@ Qed.
 End IAlgebra.
 
 Module SAlgebra.
+(* Shape algebras (𝒫, Alg); several definitions marked WRONG. / 形状代数；多处标 WRONG。 *)
 
 Import Kleene.
 

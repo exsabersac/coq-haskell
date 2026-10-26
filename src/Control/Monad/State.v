@@ -9,12 +9,21 @@ Set Implicit Arguments.
 Unset Strict Implicit.
 Unset Printing Implicit Defensive.
 
-(******************************************************************************
- * The State Monad
- *)
+(*
+Plain State monad (not a transformer): State s a := s -> (a * s).
+get / gets / put / modify; F/A/M with join-as-primitive.
+StateLaws proves FunctorLaws / ApplicativeLaws / MonadLaws via extensionality.
 
+--------
+普通 State 单子（非变换器）：State s a := s → (a * s)。
+get / gets / put / modify；F/A/M 以 join 为原语。
+StateLaws 用外延性证明 FunctorLaws / ApplicativeLaws / MonadLaws。
+*)
+
+(* State s a = s -> (a * s). / 纯状态单子。 *)
 Definition State (s a : Type) := s -> (a * s).
 
+(* Read / write / modify state. / 读 / 写 / 改状态。 *)
 Definition get  {s : Type}     : State s s := fun i => (i, i).
 Definition gets {s a : Type} f : State s a := fun s => (f s, s).
 Definition put  {s : Type} x   : State s unit := fun _ => (tt, x).

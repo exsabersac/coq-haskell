@@ -1,3 +1,14 @@
+(*
+ReaderT E m Y := E -> m Y, obtained as Compose of Impl (reader) and m.
+F/A/M via Compose_*; MonadTrans lift ignores env; MFunctor hoist.
+MonadReader: ask / local / reader. Laws via ComposeMonadLaws.
+
+--------
+ReaderT E m Y := E → m Y，作为 Impl（读环境）与 m 的 Compose。
+F/A/M 走 Compose_*；MonadTrans 的 lift 忽略环境；MFunctor hoist。
+MonadReader：ask / local / reader。定律经 ComposeMonadLaws。
+*)
+
 Require Import Hask.Prelude.
 Require Import Hask.Control.Monad.
 Require Import Hask.Control.Monad.Trans.Class.
@@ -10,6 +21,7 @@ Set Primitive Projections.
 Set Universe Polymorphism.
 Unset Transparent Obligations.
 
+(* X -> M Y. / 环境变换器。 *)
 Definition ReaderT (X : Type) (M : Type -> Type) (Y : Type) : Type :=
   X -> M Y.
 

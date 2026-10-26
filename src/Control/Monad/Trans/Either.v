@@ -1,3 +1,16 @@
+(*
+EitherT E M Y := M (Either E Y) — error / short-circuit transformer.
+F/A/M by lifting through M and Either; join collapses Right (nested EitherT).
+MonadTrans lift = fmap Right; MFunctor hoist applies the nat. transform.
+Most law proofs NYI (commented).
+
+--------
+EitherT E M Y := M (Either E Y)——错误 / 短路变换器。
+F/A/M 经 M 与 Either 提升；join 塌缩 Right（嵌套 EitherT）。
+MonadTrans lift = fmap Right；MFunctor hoist 应用自然变换。
+多数定律 NYI（注释掉）。
+*)
+
 Require Import Hask.Prelude.
 Require Import Hask.Control.Monad.
 Require Import Hask.Control.Monad.Trans.Class.
@@ -8,6 +21,7 @@ Set Primitive Projections.
 Set Universe Polymorphism.
 Unset Transparent Obligations.
 
+(* M (Either X Y). / 错误变换器。 *)
 Definition EitherT (X : Type) (M : Type -> Type) (Y : Type) : Type :=
   M (Either X Y).
 

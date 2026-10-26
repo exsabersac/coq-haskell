@@ -1,3 +1,16 @@
+(*
+LogicT: nondeterminism / backtracking transformer (Kiselyov-style CPS).
+LogicT M A wraps forall R, ((A -> M R -> M R) -> M R -> M R).
+LogicT' is an alternate CPS shape; fromLogicT / toLogicT convert
+(isomorphism proof NYI; mentions Jones–Duponcheel J2 condition).
+
+--------
+LogicT：非确定性 / 回溯变换器（Kiselyov 式 CPS）。
+LogicT M A 包住 ∀ R, ((A → M R → M R) → M R → M R)。
+LogicT' 是另一种 CPS 形状；fromLogicT / toLogicT 互转
+（同构证明 NYI；提到 Jones–Duponcheel 的 J2 条件）。
+*)
+
 Require Import Hask.Prelude.
 (* Require Import Hask.Control.Iso. *)
 Require Import Hask.Control.Monad.
@@ -8,9 +21,11 @@ Set Universe Polymorphism.
 Unset Transparent Obligations.
 Set Asymmetric Patterns.
 
+(* Backtracking CPS over M. / 在 M 上的回溯 CPS。 *)
 Inductive LogicT (M : Type -> Type) `{Monad M} (A : Type) :=
   LogicT_ : forall {R : Type}, ((A -> M R -> M R) -> M R -> M R) -> LogicT M A.
 
+(* Alternate CPS shape. / 另一种 CPS 形状。 *)
 Inductive LogicT' (M : Type -> Type) `{Monad M} (A : Type) :=
   LogicT_' : forall {R : Type}, ((A -> R -> M R) -> R -> M R) -> LogicT' M A.
 

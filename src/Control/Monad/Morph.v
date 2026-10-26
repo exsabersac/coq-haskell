@@ -1,3 +1,16 @@
+(*
+Monad morphisms (mmorph): MFunctor with hoist — lift a natural map
+M ~> N through a transformer T (T M A -> T N A).
+MMonad / embed laws are sketched but commented out.
+Documented after Gabriel Gonzalez's Control.Monad.Morph.
+
+--------
+单子态射（mmorph）：MFunctor 的 hoist——把自然映射 M ~> N
+穿过变换器 T（T M A → T N A）。
+MMonad / embed 定律草图已注释。
+文档对齐 Gonzalez 的 Control.Monad.Morph。
+*)
+
 Require Import Hask.Prelude.
 Require Import Hask.Control.Monad.
 Require Import Hask.Control.Monad.Trans.Class.
@@ -11,6 +24,7 @@ Unset Transparent Obligations.
 
    http://hackage.haskell.org/package/mmorph-1.0.3/docs/src/Control-Monad-Morph.html
 *)
+(* hoist : (M ~> N) -> T M ~> T N. / 穿过变换器的态射。 *)
 Class MFunctor (T : (Type -> Type) -> Type -> Type) :=
 { hoist : forall {M N : Type -> Type} `{Monad M} `{Monad (T M)} {A},
     (forall {X}, M X -> N X) -> T M A -> T N A

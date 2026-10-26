@@ -1,3 +1,22 @@
+(*
+Inductive Free monad (Church / "operational" Join form):
+  Free f a := Pure a | Join (x -> Free f a) (f x)
+Requires Functor f. liftF / iter / retract / hoistFree / foldFree / cutoff.
+join := Free_bind id (library join-as-primitive).
+Also CoFree (coinductive cofree comonad) at file end.
+Contrast Freer.v: that file is the CPS / "Freer" encoding of the same API.
+FreeLaws mostly commented / Admitted.
+
+--------
+归纳式 Free 单子（Join 形式）：
+  Free f a := Pure a | Join (x → Free f a) (f x)
+需要 Functor f。liftF / iter / retract / hoistFree / foldFree / cutoff。
+join := Free_bind id（本库以 join 为原语）。
+文件末还有 CoFree（余归纳余自由余单子）。
+对照 Freer.v：同套 API 的 CPS /「Freer」编码。
+FreeLaws 多半注释 / Admitted。
+*)
+
 Require Import Hask.Prelude.
 Require Import Hask.Control.Monad.
 
@@ -7,6 +26,7 @@ Set Universe Polymorphism.
 Unset Transparent Obligations.
 Set Asymmetric Patterns.
 
+(* Inductive Free (Join form). / 归纳 Free（Join 形）。 *)
 Inductive Free (f : Type -> Type) (a : Type) :=
   | Pure : a -> Free f a
   | Join : forall x, (x -> Free f a) -> f x -> Free f a.
@@ -20,6 +40,7 @@ Fixpoint iter `{Functor f} `(phi : f a -> a) (fr : Free f a) : a :=
     | Join _ g h => phi $ fmap (iter phi \o g) h
   end.
 
+(* Embed one f-layer. / 嵌入一层 f。 *)
 Definition liftF {f : Type -> Type} {a : Type} : f a -> Free f a := Join Pure.
 
 Definition uniter `{Functor f} `(psi : Free f a -> a) : f a -> a :=
@@ -222,6 +243,7 @@ Proof.
 End FreeLaws.
 *)
 
+(* Cofree comonad (coinductive). / 余自由余单子（余归纳）。 *)
 CoInductive CoFree (h : Type -> Type) (a : Type) :=
   CoF : a -> forall x, (x -> CoFree h a) -> h x -> CoFree h a.
 

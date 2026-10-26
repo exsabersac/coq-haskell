@@ -1,3 +1,20 @@
+(*
+Indexed Functor / Applicative / Monad on endofunctors of shape
+  F : Type -> Type -> Type -> Type  (I O X  — input index, output index, value).
+Laws live inside the classes (unlike ordinary FunctorLaws split).
+ibind / do-notation in imonad_scope; ijoin is the indexed join.
+Concrete instance: IState i o a := i -> (a * o) (state whose type may change).
+This is Atkey-style indexed monads for Coq Type, not the Predicate.v PMonad.
+
+--------
+索引 Functor / Applicative / Monad，形状
+  F : Type → Type → Type → Type（I O X——输入索引、输出索引、值）。
+定律写在类内（与普通 FunctorLaws 拆开不同）。
+ibind / do 记法在 imonad_scope；ijoin 是索引 join。
+具体实例：IState i o a := i → (a * o)（状态类型可变）。
+此为 Atkey 风格、针对 Coq Type 的索引单子，不是 Predicate.v 的 PMonad。
+*)
+
 Require Import Hask.Ltac.
 Require Import Hask.Prelude.
 Require Import FunctionalExtensionality.
@@ -11,6 +28,7 @@ Unset Transparent Obligations.
    and Monads I'm interested in reasoning about are all endofunctors on
    Coq, so there is no reason to carry around that extra machinery. *)
 
+(* Indexed fmap (imap) with I/O indices fixed. / 固定 I/O 指标的 imap。 *)
 Class IFunctor (F : Type -> Type -> Type -> Type) :=
 { iobj := F
 ; imap : forall {I O X Y}, (X -> Y) -> F I O X -> F I O Y
@@ -75,6 +93,7 @@ End IFunctors.
 
 Reserved Notation "f <**> g" (at level 28, left associativity).
 
+(* Indexed Applicative: ipure keeps I=I; iap composes indices I-J-K. / 索引应用子。 *)
 Class IApplicative (F : Type -> Type -> Type -> Type) :=
 { is_ifunctor :> IFunctor F
 
@@ -349,6 +368,7 @@ Section IApplicatives.
 End IApplicatives.
 
 
+(* Indexed Monad: ijoin collapses middle index A. / 索引单子：ijoin 消去中间指标。 *)
 Class IMonad (M : Type -> Type -> Type -> Type) :=
 { is_iapplicative :> IApplicative M
 
@@ -450,6 +470,7 @@ Proof.
   f_equal.
 Qed.
 
+(* Indexed State: input type i, output type o. / 索引状态：输入 i、输出 o。 *)
 Inductive IState (i o a : Type) := mkIState : (i -> (a * o)) -> IState i o a.
 
 Arguments mkIState [i o a] _.

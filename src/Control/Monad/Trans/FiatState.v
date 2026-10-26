@@ -11,10 +11,20 @@ Set Implicit Arguments.
 Unset Strict Implicit.
 Unset Printing Implicit Defensive.
 
-(******************************************************************************
- * The StateT Monad transformer
- *)
+(*
+Fiat-oriented StateT: StateT s m a := s -> m (s * a)%type
+(state * result order — opposite of Trans/State.v).
+Same getT/putT/modifyT surface, but pair order matches Fiat conventions.
+F/A/M instances and laws largely commented / Admitted.
 
+--------
+偏 Fiat 的 StateT：StateT s m a := s → m (s * a)%type
+（状态在前、结果在后——与 Trans/State.v 相反）。
+getT/putT/modifyT 表面相同，但二元组顺序对齐 Fiat。
+F/A/M 实例与定律多半注释 / Admitted。
+*)
+
+(* s -> m (s * a). / Fiat 序：状态在前。 *)
 Definition StateT (s : Type) (m : Type -> Type) (a : Type):=
   s -> m (s * a)%type.
 
