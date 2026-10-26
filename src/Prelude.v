@@ -1,3 +1,14 @@
+(*
+Haskell-facing prelude: re-exports Either / Maybe / Tuple / Functor,
+plus small combinators ($ , flip, const, compose) familiar from Prelude.
+Lia lemmas at the bottom are arithmetic helpers, not part of the Haskell mirror.
+
+--------
+面向 Haskell 的入口：再导出 Either / Maybe / Tuple / Functor，
+以及 `$`、flip、const、compose 等熟悉的组合子。
+文末 Lia 引理是算术辅助，不属于 Haskell 镜像本身。
+*)
+
 Require Import Hask.Ltac.
 Require Export Hask.Data.Either.
 Require Export Hask.Data.Maybe.
@@ -15,14 +26,18 @@ Unset Printing Implicit Defensive.
 
 Definition undefined {a : Type} : a. Admitted.
 
+(* `$` : application with low precedence, like Haskell. / `$`：低优先级函数应用，同 Haskell。 *)
 Notation "f $ x" := (f x) (at level 60, right associativity, only parsing).
 
+(* flip f y x = f x y / 交换二元函数参数顺序 *)
 Definition flip `(f : a -> b -> c) : b -> a -> c := fun y x => f x y.
 
+(* const x _ = x / 常值函数 *)
 Definition const {A B : Type} (x : B) : A -> B := fun _ => x.
 
 Definition apply `(f : a -> b) (x : a) : b := f x.
 
+(* compose f g = f \o g ; ssreflect composition / 函数复合（ssreflect 的 \o） *)
 Definition compose {a b c : Type} (f : b -> c) (g : a -> b) : a -> c := f \o g.
 
 Lemma compA {a b c d : Type} (h : a -> b) (g : b -> c) (f : c -> d) :

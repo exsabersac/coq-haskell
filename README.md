@@ -1,3 +1,5 @@
+> 中文说明见 [README.zh-CN.md](./README.zh-CN.md)。
+
 coq-haskell
 ===========
 

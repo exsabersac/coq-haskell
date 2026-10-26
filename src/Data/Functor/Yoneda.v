@@ -1,3 +1,14 @@
+(*
+Yoneda f a := ∀ r. (a → r) → f r
+Used so extraction keeps the type parameter a (bare m a erases it).
+Coyoneda is the "existential" dual form, useful for freer-style fmap fusion.
+
+--------
+Yoneda f a := ∀ r. (a → r) → f r
+抽取时用来保住类型参数 a（裸 m a 会被擦掉）。
+Coyoneda 是「存在量词」对偶形式，便于 freer 式的 fmap 融合。
+*)
+
 Require Import Hask.Prelude.
 Require Import Hask.Ltac.
 Require Import Hask.Data.Functor.Identity.
@@ -10,6 +21,7 @@ Set Universe Polymorphism.
 Unset Transparent Obligations.
 Set Asymmetric Patterns.
 
+(* Continuation form of the Yoneda embedding. / Yoneda 嵌入的延续形式。 *)
 Definition Yoneda (f : Type -> Type) (a : Type) :=
   forall r : Type, (a -> r) -> f r.
 
@@ -164,9 +176,15 @@ End YonedaLaws.
 
 (**************************************************************************)
 
-(* The contravariant Yoneda lemma, made applicable to covariant functors by
-   changing it from a universally quantified function to an existentially
-   quantified construction of two arguments. *)
+(*
+The contravariant Yoneda lemma, made applicable to covariant functors by
+changing it from a universally quantified function to an existentially
+quantified construction of two arguments.
+
+--------
+反变 Yoneda 引理改写成对协变函子可用的形式：
+从全称量化的函数，变成带两个参数的存在量化构造。
+*)
 
 Inductive Coyoneda (f : Type -> Type) (a : Type) :=
   COYO : forall x, (x -> a) -> f x -> Coyoneda f a.

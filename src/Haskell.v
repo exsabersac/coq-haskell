@@ -1,3 +1,14 @@
+(*
+Extraction bridge: set Extraction Language Haskell and map Coq inductives
+(option, list, sum, bool, …) onto Prelude / Data.* names, plus assorted
+inlined constants. Load this (or Extract.v) when you want .hs output.
+
+--------
+抽取桥接：设定 Extraction Language Haskell，把 Coq 归纳类型
+（option、list、sum、bool…）映射到 Prelude / Data.*，并内联若干常量。
+需要输出 .hs 时 Require 本文件（或 Extract.v）。
+*)
+
 Require Import Hask.Prelude.
 Require Import Hask.Data.IntMap.
 Require Import Hask.Data.IntSet.
@@ -94,8 +105,13 @@ Extract Inlined Constant eq_rec_r => "".
 
 (* Prelude *)
 
-(** Danger!  Using Int is efficient, but requires we know we won't exceed
-    its bounds. *)
+(**
+Danger!  Using Int is efficient, but requires we know we won't exceed
+its bounds.
+
+--------
+注意：抽成 Int 更高效，但必须保证不会超出 Int 范围。
+*)
 Extract Inductive Datatypes.nat => "Prelude.Int" ["0" "(Prelude.succ)"]
   "(\fO fS n -> if n Prelude.<= 0 then fO () else fS (n Prelude.- 1))".
 

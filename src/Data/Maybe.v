@@ -1,3 +1,16 @@
+(*
+Maybe as a thin alias of Coq option (Just/Nothing = Some/None),
+with Functor / Applicative / Monad / Alternative instances —
+a worked example of how data types plug into the Hask typeclass tower.
+join is the primitive for Monad (flatten nested option).
+
+--------
+Maybe 是 Coq option 的薄别名（Just/Nothing = Some/None），
+并给出 Functor / Applicative / Monad / Alternative 实例——
+数据型如何挂上 Hask 类型类塔的样板。
+Monad 仍以 join 为原语（压平嵌套 option）。
+*)
+
 Require Import Hask.Control.Monad.
 
 Generalizable All Variables.
@@ -5,6 +18,7 @@ Set Primitive Projections.
 Set Universe Polymorphism.
 Unset Transparent Obligations.
 
+(* Haskell names for option. / 用 Haskell 名指称 option。 *)
 Notation Maybe   := option.
 Notation Nothing := None.
 Notation Just    := Some.
@@ -28,6 +42,7 @@ Definition Maybe_map `(f : X -> Y) (x : Maybe X) : Maybe Y :=
   end.
 
 #[export]
+(* fmap = Maybe_map / 函子实例 *)
 Instance Maybe_Functor : Functor Maybe := {
   fmap := @Maybe_map
 }.
@@ -42,6 +57,7 @@ Definition Maybe_apply {X Y} (f : Maybe (X -> Y)) (x : Maybe X) : Maybe Y :=
   end.
 
 #[export]
+(* pure = Just ; ap = Maybe_apply / 应用子实例 *)
 Instance Maybe_Applicative : Applicative Maybe := {
   is_functor := Maybe_Functor;
 
@@ -57,6 +73,7 @@ Definition Maybe_join {X} (x : Maybe (Maybe X)) : Maybe X :=
   end.
 
 #[export]
+(* join = Maybe_join (flatten) / 单子实例：join 压平 *)
 Instance Maybe_Monad : Monad Maybe := {
   is_applicative := Maybe_Applicative;
   join := @Maybe_join
@@ -71,6 +88,7 @@ Definition Maybe_choose {a} (x y : Maybe a) : Maybe a :=
   end.
 
 #[export]
+(* empty = Nothing ; choose prefers left Just / 选择：偏左 Just *)
 Instance Maybe_Alternative : Alternative Maybe := {
   empty  := @Nothing;
   choose := @Maybe_choose

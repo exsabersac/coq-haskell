@@ -1,3 +1,14 @@
+(*
+Applicative: Functor + pure + ap (<*>), mirroring Control.Applicative.
+liftA2 / *> / <* are derived. ApplicativeLaws states the four classic laws
+plus ap (pure f) = fmap f. Alternative (empty / <|>) sits at the bottom.
+
+--------
+Applicative：在 Functor 上加 pure 与 ap（<*>），对齐 Control.Applicative。
+liftA2 / *> / <* 由定义推出。ApplicativeLaws 含四条经典定律，
+外加 ap (pure f) = fmap f。文末是 Alternative（empty / <|>）。
+*)
+
 Require Export Hask.Ltac.
 Require Export Hask.Data.Functor.
 Require Export Hask.Data.Functor.Const.
@@ -9,6 +20,9 @@ Unset Transparent Obligations.
 
 Reserved Notation "f <*> g" (at level 28, left associativity).
 
+(* pure : a -> f a ; ap : f (a -> b) -> f a -> f b
+   --------
+   pure：注入；ap：在上下文中应用函数。 *)
 Class Applicative (f : Type -> Type) := {
   is_functor :> Functor f;
 
@@ -37,6 +51,7 @@ Infix "<*[ M ]>" :=
 (*     (at level 9, left associativity, f at level 9, *)
 (*      x at level 9, y at level 9, z at level 9). *)
 
+(* liftA2 f x y = f <$> x <*> y / 提升二元函数 *)
 Definition liftA2 `{Applicative m} {A B C : Type}
   (f : A -> B -> C) (x : m A) (y : m B) : m C := ap (fmap f x) y.
 
@@ -49,6 +64,14 @@ Module ApplicativeLaws.
 
 Include FunctorLaws.
 
+(*
+Laws: identity, composition, homomorphism, interchange;
+plus coherence ap (pure f) = fmap f.
+
+--------
+定律：恒等、复合、同态、交换；
+以及相容性 ap (pure f) = fmap f。
+*)
 Class ApplicativeLaws (f : Type -> Type) `{Applicative f} := {
   has_functor_laws :> FunctorLaws f;
 
@@ -128,6 +151,9 @@ End ApplicativeLaws.
 
 Reserved Notation "f <|> g" (at level 29, left associativity).
 
+(* Alternative: empty choice + choose (<|>), like parsers / Maybe.
+   --------
+   Alternative：空选择与 choose（<|>），类似解析器 / Maybe。 *)
 Class Alternative (F : Type -> Type) :=
 { alt_is_applicative :> Applicative F
 

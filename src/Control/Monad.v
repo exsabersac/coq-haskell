@@ -1,3 +1,20 @@
+(*
+Monad: Applicative + join : m (m a) -> m a.
+Unlike Haskell's (>>=)-centric class, join is primitive here;
+bind is defined as join \o fmap f (more algebraic / categorical).
+Do-notation (X <- A ; B) and Kleisli (>=>) live in monad_scope.
+MonadLaws are the join equations; Monad_Distributes sketches
+Jones–Duponcheel composition of monads.
+
+--------
+Monad：Applicative + join : m (m a) → m a。
+与 Haskell 以 >>= 为中心不同，这里以 join 为原语；
+bind := join \o fmap f（更偏代数 / 范畴）。
+do 记法（X <- A ; B）与 Kleisli（>=>）在 monad_scope。
+MonadLaws 是 join 等式；Monad_Distributes 对应
+Jones–Duponcheel 的单子复合草图。
+*)
+
 Require Export Hask.Control.Applicative.
 
 Generalizable All Variables.
@@ -5,6 +22,7 @@ Set Primitive Projections.
 Set Universe Polymorphism.
 Unset Transparent Obligations.
 
+(* Primitive: join. / 原语：join（乘法）。 *)
 Class Monad (m : Type -> Type) := {
   is_applicative :> Applicative m;
 
@@ -13,9 +31,11 @@ Class Monad (m : Type -> Type) := {
 
 Arguments join {m _ _} _.
 
+(* bind f = join \o fmap f  ≡  (>>=) flipped / bind：由 join 导出的绑定 *)
 Definition bind `{Monad m} {X Y : Type} (f : (X -> m Y)) : m X -> m Y :=
   join \o fmap f.
 
+(* return_ = pure (Haskell return) / return_：即 pure *)
 Definition return_ `{Monad m} {a : Type} : a -> m a := pure.
 
 Declare Scope monad_scope.
@@ -29,6 +49,7 @@ Notation "a >> b" := (a >>= fun _ => b)%monad (at level 81, right associativity)
 
 Bind Scope monad_scope with Monad.
 
+(* Kleisli composition (>=>) / Kleisli 复合 *)
 Definition kleisli_compose `{Monad m} `(f : a -> m b) `(g : b -> m c) :
   a -> m c := fun x => (f x >>= g)%monad.
 
@@ -136,6 +157,12 @@ Module MonadLaws.
 
 Include ApplicativeLaws.
 
+(*
+join laws: associativity, left/right unit, and naturality of join.
+
+--------
+join 定律：结合律、左右单位、以及 join 的自然性。
+*)
 Class MonadLaws (m : Type -> Type) `{Monad m} := {
   has_applicative_laws :> ApplicativeLaws m;
 
@@ -183,12 +210,19 @@ Proof.
   reflexivity.
 Qed.
 
-(* These proofs are due to Mark P. Jones and Luc Duponcheel in their article
-   "Composing monads", Research Report YALEU/DCS/RR-1004, December 1993.
+(*
+These proofs are due to Mark P. Jones and Luc Duponcheel in their article
+"Composing monads", Research Report YALEU/DCS/RR-1004, December 1993.
 
-   Given any Monad M, and any Premonad N (i.e., having pure), and further given
-   an operation [prod] and its accompanying four laws, it can be shown that M
-   N is closed under composition.
+Given any Monad M, and any Premonad N (i.e., having pure), and further given
+an operation [prod] and its accompanying four laws, it can be shown that M
+N is closed under composition.
+
+--------
+下列证明思路来自 Mark P. Jones 与 Luc Duponcheel，
+《Composing monads》（YALEU/DCS/RR-1004，1993）。
+任意 Monad M 与带 pure 的 Premonad N，再配上 [prod] 及其四条定律，
+可说明复合 M N 在单子意义下封闭。
 *)
 Class Monad_DistributesLaws `{Applicative (M \o N)} `{Monad_Distributes M N} :=
 {

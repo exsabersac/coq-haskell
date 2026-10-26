@@ -1,3 +1,13 @@
+(*
+Separate Extraction entrypoint: Require the pieces you care about, then
+list identifiers for Coq to emit as Haskell modules.
+Depends on Haskell.v for the inductive/constant mappings.
+
+--------
+Separate Extraction 入口：Require 所需模块后，列出要抽成 Haskell 的标识符。
+归纳类型 / 常量映射依赖 Haskell.v。
+*)
+
 Require Import Hask.Prelude.
 Require Import Hask.Data.Functor.
 Require Import Hask.Data.Functor.Container.
