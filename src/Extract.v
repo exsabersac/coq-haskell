@@ -30,6 +30,7 @@ Require Import Hask.Data.NonEmpty.
 Require Import Hask.Data.Vector.
 Require Import Hask.Haskell.
 
+(* Identifiers emitted as .hs modules. / 下列标识符抽成 .hs 模块。 *)
 Separate Extraction
   Hask.Control.Applicative.Applicative
   Hask.Control.Monad.Trans.Free.Free

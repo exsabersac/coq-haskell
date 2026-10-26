@@ -1,3 +1,12 @@
+(*
+[research] Monad via join + laws in the class; bind as join ∘ fmap.
+Predecessor of src/Control/Monad.v. Not in _CoqProject.
+--------
+【research / 实验草稿，未入 _CoqProject】
+以 join 为原语的 Monad（定律在类内）；bind := join ∘ fmap。
+src/Control/Monad.v 的前身。
+*)
+
 Require Export Applicative.
 Require Import Coq.Lists.List.
 

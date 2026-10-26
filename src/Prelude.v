@@ -9,6 +9,7 @@ Lia lemmas at the bottom are arithmetic helpers, not part of the Haskell mirror.
 文末 Lia 引理是算术辅助，不属于 Haskell 镜像本身。
 *)
 
+(* Hask.Ltac: inv / \o helpers used by instances. / 实例证明用的 inv、\o 等。 *)
 Require Import Hask.Ltac.
 Require Export Hask.Data.Either.
 Require Export Hask.Data.Maybe.

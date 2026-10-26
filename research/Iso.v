@@ -1,3 +1,11 @@
+(*
+[research] Type isomorphisms (Iso / ≅) and related lemmas; depends on
+older Endo/FCompose stack. Experimental — not in _CoqProject.
+--------
+【research / 实验草稿，未入 _CoqProject】
+类型同构 Iso / ≅ 及相关引理；依赖旧版 Endo/FCompose 栈。
+*)
+
 Require Import Ssreflect.choice.
 
 Require Export Basics.
