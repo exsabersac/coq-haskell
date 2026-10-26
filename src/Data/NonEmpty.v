@@ -1,3 +1,14 @@
+(*
+NonEmpty lists: inductive NE_Sing / NE_Cons (never empty).
+Helpers (from/to list, map, fold, append, StronglySorted, …)
+and notations live below but are currently commented out.
+
+--------
+非空列表：归纳型 NE_Sing / NE_Cons（永不为空）。
+辅助函数（与 list 互转、map、fold、append、StronglySorted…）
+及记法写在下方，目前整段注释。
+*)
+
 Require Import Hask.Prelude.
 
 Require Import Coq.Sorting.Sorted.
@@ -11,8 +22,9 @@ Set Implicit Arguments.
 Unset Strict Implicit.
 Unset Printing Implicit Defensive.
 
-(** ** NonEmpty lists *)
+(** ** NonEmpty lists / 非空列表 *)
 
+(* Inductive: singleton or cons onto NonEmpty. / 归纳：单点或接到 NonEmpty 前。 *)
 Inductive NonEmpty (a : Type) : Type :=
   | NE_Sing : a -> NonEmpty a
   | NE_Cons : a -> NonEmpty a -> NonEmpty a.
@@ -24,6 +36,7 @@ Arguments NE_Cons [_] _ _.
 Notation "[ ::: x1 ]" := (NE_Sing x1)
   (at level 0, format "[ :::  x1 ]") : seq_scope.
 
+(* Build from head + tail list. / 由头元素 + 尾列表构造。 *)
 Fixpoint NE_from_list {a} (x : a) (xs : seq a) : NonEmpty a :=
   match xs with
     | nil => NE_Sing x
@@ -39,6 +52,7 @@ Fixpoint NE_length {a} (ne : NonEmpty a) : nat :=
     | NE_Cons x xs => 1 + NE_length xs
   end.
 
+(* Forget non-emptiness → list. / 忘掉非空，落到 list。 *)
 Fixpoint NE_to_list {a} (ne : NonEmpty a) : list a :=
   match ne with
     | NE_Sing x => cons x nil
@@ -116,6 +130,9 @@ Proof. by elim E: xs => // [*] in x *. Qed.
 Lemma NE_last_from_list a (x : a) xs : NE_last (NE_from_list x xs) = last x xs.
 Proof. by elim: xs => //= [*] in x *. Qed.
 
+(* Map / fold / mapAccumL / append — list-like API on NonEmpty.
+   --------
+   Map / fold / mapAccumL / append — 非空上的类 list API。 *)
 Fixpoint NE_map {a b : Type} (f : a -> b) (ne : NonEmpty a) : NonEmpty b :=
   match ne with
     | NE_Sing x => NE_Sing (f x)
@@ -191,6 +208,7 @@ Variable A : Set.
 Variable R : A -> A -> Prop.
 Context `{H : Transitive A R}.
 
+(* Pointwise predicate on NonEmpty. / NonEmpty 上的逐点谓词。 *)
 Inductive NE_Forall (P : A -> Prop) : NonEmpty A -> Prop :=
  | NE_Forall_sing : forall x, P x -> NE_Forall P (NE_Sing x)
  | NE_Forall_cons : forall x l, P x -> NE_Forall P l
@@ -235,6 +253,7 @@ Qed.
 
 End Membership.
 
+(* Strongly sorted NonEmpty w.r.t. R. / 相对 R 的强排序 NonEmpty。 *)
 Inductive NE_StronglySorted : NonEmpty A -> Prop :=
   | NE_SSorted_sing a   : NE_StronglySorted (NE_Sing a)
   | NE_SSorted_cons a l : NE_StronglySorted l -> NE_Forall (R a) l

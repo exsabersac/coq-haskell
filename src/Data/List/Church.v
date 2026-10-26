@@ -1,4 +1,13 @@
-(* Church-encoded lists. *)
+(*
+Church-encoded lists: Church a := ∀ r. (a → r → r) → r → r
+(foldr as the data). toChurch/fromChurch, induction, length/append
+and proofs are sketched but currently commented out.
+
+--------
+Church 编码列表：Church a := ∀ r. (a → r → r) → r → r
+（以 foldr 为数据本身）。toChurch/fromChurch、归纳、长度/拼接
+及证明已草拟，目前整体注释掉。
+*)
 
 Require Import Hask.Prelude.
 Require Import FunctionalExtensionality.
@@ -8,6 +17,7 @@ Set Primitive Projections.
 Set Universe Polymorphism.
 Unset Transparent Obligations.
 
+(* Church a ≅ foldr algebra. / Church a ≅ foldr 代数。 *)
 Definition Church (a : Type) := forall r, (a -> r -> r) -> r -> r.
 
 (*

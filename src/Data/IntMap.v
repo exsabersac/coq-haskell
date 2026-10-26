@@ -1,3 +1,14 @@
+(*
+IntMap stub for extraction: Coq side wraps seq (nat * a) with
+lookup/alter/map/merge/fold helpers; extracted Haskell uses Data.IntMap.
+Body is currently commented out (MathComp-style).
+
+--------
+面向抽取的 IntMap 桩：Coq 侧包装 seq (nat * a)，
+提供 lookup/alter/map/merge/fold；抽出的 Haskell 用 Data.IntMap。
+主体目前整段注释（MathComp 风格）。
+*)
+
 Require Import Hask.Prelude.
 Require Import Hask.Ltac.
 Require Import Hask.Data.List.
@@ -13,6 +24,7 @@ Set Universe Polymorphism.
 Unset Transparent Obligations.
 
 (*
+(* Wrapper: finite map nat → a as association list. / 包装：关联表表示有限映射。 *)
 Inductive IntMap (a : Type) := getIntMap of seq (nat * a).
 
 Arguments getIntMap {a} _.
@@ -24,9 +36,9 @@ Definition IntMap_fromList {a} := @getIntMap a.
 Definition IntMap_size : forall a, IntMap a -> nat :=
   fun _ m => let: getIntMap x := m in size x.
 
-(* We needn't bother defining these in Coq, since they only matter to the
-   extracted Haskell code, and there we use the definitions from
-   [Data.IntMap]. *)
+(* Coq defs for reasoning; extraction remaps to Data.IntMap.
+   --------
+   Coq 定义供推理；抽取映射到 Data.IntMap。 *)
 Definition IntMap_lookup : forall a, nat -> IntMap a -> option a :=
   fun _ k m => let: getIntMap x := m in maybeLookup x k.
 
@@ -104,7 +116,9 @@ Proof.
   exact: getIntMap_inj.
 Qed.
 
-(* The implementation of this function is in LinearScan.Utils.hs *)
+(* Stub merge; real impl lives in extracted Haskell (LinearScan.Utils).
+   --------
+   merge 桩；真正实现在抽出的 Haskell（LinearScan.Utils）。 *)
 Definition IntMap_mergeWithKey' {a b c}
   (combine : nat -> a -> b -> option c)
   (only1 : seq (nat * a) -> seq (nat * c))
@@ -186,6 +200,7 @@ Canonical IntMap_eqType := Eval hnf in EqType (IntMap a) IntMap_eqMixin.
 
 End EqIntMap.
 
+(* Group a list by a nat key into NonEmpty buckets. / 按 nat 键分组到 NonEmpty。 *)
 Definition IntMap_groupOn {a} (p : a -> nat) (l : seq a) :
   IntMap (NonEmpty a) :=
   forFold emptyIntMap l $ fun acc x =>

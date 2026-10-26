@@ -1,3 +1,17 @@
+(*
+Haskell-style list utilities on Coq list: lookup, Maybe conversions,
+olast, folds, span/partition, sortBy, plus Functor / Applicative
+instances (no default Monad — concat/join is available as concat).
+Much of the MathComp-flavored material is commented; live code uses
+stdlib ListNotations.
+
+--------
+Coq list 上的 Haskell 风格工具：lookup、与 Maybe 互转、
+olast、折叠、span/partition、sortBy，以及 Functor / Applicative
+实例（默认不挂 Monad——concat 即 join 可用）。
+大量 MathComp 风材料已注释；现行代码用标准库 ListNotations。
+*)
+
 Require Import Hask.Ltac.
 Require Import Hask.Control.Monad.
 Require Import Hask.Data.Eq.
@@ -18,8 +32,10 @@ Unset Printing Implicit Defensive.
 
 Import ListNotations.
 
+(* Flatten list of lists (Monad join). / 压平列表的列表（单子 join）。 *)
 Definition concat {A} : list (list A) -> list A := flatten.
 
+(* Assoc-list lookup with default. / 关联表查找（带默认值）。 *)
 Fixpoint lookup `{Eq a} {b} (dflt : b) (v : list (a * b)) (x : a) : b :=
   match v with
   | nil => dflt
@@ -29,6 +45,7 @@ Fixpoint lookup `{Eq a} {b} (dflt : b) (v : list (a * b)) (x : a) : b :=
     else lookup dflt xs x
   end.
 
+(* Assoc-list lookup → Maybe. / 关联表查找 → Maybe。 *)
 Fixpoint maybeLookup `{Eq a} {b} (v : list (a * b)) (x : a) : Maybe b :=
   match v with
   | (k, v) :: xs =>
@@ -38,12 +55,14 @@ Fixpoint maybeLookup `{Eq a} {b} (v : list (a * b)) (x : a) : Maybe b :=
   | _ => Nothing
   end.
 
+(* Empty → Nothing; else Just the list. / 空 → Nothing；否则 Just 整表。 *)
 Definition listToMaybe `(xs : list a) : Maybe (list a) :=
   match xs with
     | [] => Nothing
     | _  => Just xs
   end.
 
+(* Maybe → 0-or-1 element list. / Maybe → 零或一元列表。 *)
 Definition maybeToList `(mx : Maybe a) : list a :=
   match mx with
   | Just x => [x]
@@ -55,6 +74,7 @@ Lemma rcons_nil : forall a us (u : a), rcons us u = [] -> False.
 Proof. by move=> a us u; case: us => // [|? ?] in u *. Qed.
 *)
 
+(* Safe last → Maybe. / 安全取末元 → Maybe。 *)
 Definition olast a (l : list a) : Maybe a :=
   let fix go res xs :=
       match xs with
@@ -468,12 +488,17 @@ Fixpoint apply_nth {a} (def : a) (v : list a) i (f : a -> a) {struct i} :=
        else f x :: v'
   else ncons i def [def].
 
+(* Left fold with args reordered (for-comprehension style).
+   --------
+   参数重排的左折叠（类 for 写法）。 *)
 Definition forFold {A B : Type} (b : B) (v : list A) (f : B -> A -> B) : B :=
   foldl f b v.
 
+(* Right fold, for-style args. / 右折叠，for 风格参数序。 *)
 Definition forFoldr {A B : Type} (b : B) (v : list A) (f : A -> B -> B) : B :=
   foldr f b v.
 
+(* Left fold carrying the index. / 带下标的左折叠。 *)
 Definition foldl_with_index
   {A B : Type} (f : nat -> B -> A -> B) (b : B) (v : list A) : B :=
   let fix go n xs z :=
@@ -493,6 +518,7 @@ Lemma foldl_cons : forall a (x : a) xs,
     = foldl (fun us : list a => cons^~ us) [] [x & xs].
 Proof. by move=> a x; elim. Qed.
 
+(* Right fold carrying the index. / 带下标的右折叠。 *)
 Definition foldr_with_index
   {A B : Type} (f : nat -> A -> B -> B) (b : B) (v : list A) : B :=
   let fix go n xs z :=
@@ -507,6 +533,7 @@ Example ex_foldr_with_index_1 :
     == [(0, 1); (1, 2); (2, 3)].
 Proof. reflexivity. Qed.
 
+(* Keep Just payloads. / 留下 Just 载荷。 *)
 Definition catMaybes {a} (l : list (Maybe a)) : list a :=
   (fun f => foldr f [] l) (fun mx rest =>
     if mx is Just x
@@ -514,6 +541,7 @@ Definition catMaybes {a} (l : list (Maybe a)) : list a :=
     else rest).
 *)
 
+(* Thread state left-to-right while mapping. / 映射同时从左到右传递状态。 *)
 Fixpoint mapAccumL {A X Y : Type} (f : A -> X -> (A * Y))
   (s : A) (v : list X) : A * list Y :=
   match v with
@@ -529,6 +557,7 @@ Example ex_mapAccumL_1 :
 Proof. reflexivity. Qed.
 
 (*
+(* First element satisfying p. / 第一个满足 p 的元素。 *)
 Definition getBy {a} (p : a -> bool) (xs : list a) : Maybe a :=
   (fun f => foldl f Nothing xs) (fun acc x =>
     match acc with
@@ -568,6 +597,7 @@ Defined.
 
 Arguments safe_last [a] xs H.
 
+(* Split longest prefix satisfying p. / 切出满足 p 的最长前缀。 *)
 Fixpoint span {a} (p : a -> bool) (l : list a) : (list a * list a) :=
   match l with
   | nil => (nil, nil)
@@ -628,6 +658,7 @@ Example groupBy_ex1 :
     = [[1]; [3; 3]; [4]; [5; 5]; [9]; [6]; [8]].
 Proof. reflexivity. Qed.
 
+(* Partition by predicate. / 按谓词分割。 *)
 Definition partition {a} (p : a -> bool) : list a -> list a * list a :=
   foldr (fun x acc =>
            if p x
@@ -750,6 +781,7 @@ Qed.
 Lemma has_size : forall (a : eqType) x (xs : list a), x \in xs -> 0 < size xs.
 Proof. move=> a x; elim=> //. Qed.
 
+(* Ordered insert for insertion sort. / 插入排序用的有序插入。 *)
 Fixpoint insert {a} (P : a -> a -> bool) (z : a) (l : list a) : list a :=
   if l is x :: xs
   then if P x z
@@ -758,6 +790,7 @@ Fixpoint insert {a} (P : a -> a -> bool) (z : a) (l : list a) : list a :=
   else [z].
 Arguments insert {a} P z l : simpl never.
 
+(* Insertion sort by comparison p. / 按比较 p 的插入排序。 *)
 Fixpoint sortBy {a} (p : a -> a -> bool) (l : list a) : list a :=
   match l with
   | [] => nil
@@ -1072,10 +1105,12 @@ Proof.
 Qed. *)
 
 #[export]
+(* fmap = map / 函子实例 *)
 Instance List_Functor : Functor list := {
   fmap := map
 }.
 
+(* Cartesian ap for lists. / 列表的笛卡尔 ap。 *)
 Fixpoint list_ap {A B} (fs: list (A -> B)) (xs: list A)
   : list B :=
   match fs with
@@ -1085,6 +1120,7 @@ Fixpoint list_ap {A B} (fs: list (A -> B)) (xs: list A)
 
 
 #[export]
+(* pure = singleton; ap = list_ap / 应用子实例 *)
 Instance List_Applicative : Applicative list := {
   pure := fun _ x => [x];
   ap   := @list_ap
@@ -1092,6 +1128,7 @@ Instance List_Applicative : Applicative list := {
 
 Require Import FunctionalExtensionality.
 
+(* Law proofs / sketches for list F/A. / 列表 F/A 定律证明或草稿。 *)
 Module ListLaws.
 
 Include MonadLaws.
