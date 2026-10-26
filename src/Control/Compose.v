@@ -1,3 +1,14 @@
+(*
+Compose: Functor / Applicative / Alternative / Monad instances for F \o G.
+Monad needs Monad_Distributes (prod : N (M a) -> M (N a)) from Control.Monad —
+Jones–Duponcheel style. ComposeMonadLaws lifts the component laws.
+
+--------
+Compose：F \o G 上的 Functor / Applicative / Alternative / Monad 实例。
+Monad 需要 Control.Monad 的 Monad_Distributes（prod : N (M a) → M (N a)）—
+Jones–Duponcheel 风格。ComposeMonadLaws 把分量定律抬到复合上。
+*)
+
 Require Import Hask.Data.Functor.
 Require Import Hask.Control.Applicative.
 Require Import Hask.Control.Monad.
@@ -7,11 +18,13 @@ Set Primitive Projections.
 Set Universe Polymorphism.
 Unset Transparent Obligations.
 
+(* fmap[F∘G] = fmap[F] ∘ fmap[G] / 复合函子上的 fmap *)
 #[export]
 Instance Compose_Functor `{Functor F} `{Functor G} : Functor (F \o G) :=
 { fmap := fun A B => @fmap F _ (G A) (G B) \o @fmap G _ A B
 }.
 
+(* pure / ap nested through F then G / pure、ap 先经 F 再经 G *)
 #[export]
 Instance Compose_Applicative (F : Type -> Type) (G : Type -> Type)
   `{Applicative F} `{Applicative G} : Applicative (F \o G)  :=
@@ -20,6 +33,7 @@ Instance Compose_Applicative (F : Type -> Type) (G : Type -> Type)
 ; ap   := fun A B => ap \o fmap (@ap G _ A B)
 }.
 
+(* Alternative: empty/choose from outer F / Alternative：empty/choose 取外层 F *)
 #[export]
 Instance Compose_Alternative
   `{Alternative F} `{Alternative G} : Alternative (F \o G) :=
@@ -27,6 +41,7 @@ Instance Compose_Alternative
 ; choose := fun A => @choose F _ (G A) (* jww (2016-01-28): correct? *)
 }.
 
+(* join via distribute (prod) then join[M] / 先 prod 交换层，再 join[M] *)
 #[export]
 Instance Compose_Monad `{Monad_Distributes M N}
   : Monad (M \o N) :=

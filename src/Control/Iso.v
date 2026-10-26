@@ -1,3 +1,17 @@
+(*
+Algebra of types via isomorphism (≅): sums/products/exponentials as
++/×/→ with the usual ring-like laws, plus adjoints, representability,
+Yoneda/Coyoneda, Cont, Codensity, Free≅Fix, and VL Lens ↔ IStore.
+Prop-level isomorphic, class Isomorphism, setoid morphisms. Not in the
+default _CoqProject build — experimental / research companion to Lens.
+
+--------
+用同构（≅）做类型代数：和/积/指数对应 +/×/→ 及常见环式定律；
+另有伴随、可表示性、Yoneda/Coyoneda、Cont、Codensity、Free≅Fix、
+以及 VL Lens ↔ IStore。命题级 isomorphic、类 Isomorphism、setoid 态射。
+默认不进 _CoqProject — 偏实验，作 Lens 的研究伴侣。
+*)
+
 Require Import Hask.Ltac.
 Require Import Hask.Prelude.
 Require Import Hask.Control.Applicative.
@@ -19,13 +33,17 @@ Set Primitive Projections.
 Set Universe Polymorphism.
 Unset Transparent Obligations.
 
-(** Type Constants *)
+(* Type constants: zero=False, one=unit, two=bool
+   --------
+   类型常量：zero=False，one=unit，two=bool *)
 
 Definition zero := False.
 Definition one  := unit.
 Definition two  := bool.
 
-(** Tactic helpers *)
+(* Tactic: extensionalize (ext + destruct zeros/units/sums/prods)
+   --------
+   战术：extensionalize（外延 + 拆解 zero/unit/和/积） *)
 
 Require Import FunctionalExtensionality.
 
@@ -54,7 +72,11 @@ Ltac extensionalize :=
           end);
   auto.
 
-(** Isomorphisms *)
+(* isomorphic X Y: ∃ f g. f∘g=id ∧ g∘f=id  (notation X ≅ Y)
+   Class Isomorphism packages to/from with proofs. Setoid + morphisms.
+   --------
+   isomorphic X Y：∃ f g. f∘g=id ∧ g∘f=id（记作 X ≅ Y）。
+   类 Isomorphism 打包 to/from 及证明。Setoid 与态射。 *)
 
 Infix "∘" := comp (at level 50).
 
@@ -100,7 +122,7 @@ Add Parametric Relation {A B : Type} : Type isomorphic
 Add Parametric Morphism : Basics.arrow
   with signature (isomorphic ==> isomorphic ==> isomorphic)
     as fun_isomorphism.
-(* function types respect isomorphism *)
+(* function types respect ≅ / 函数类型尊重 ≅ *)
 Proof.
   intros.
   destruct H as [from_x].
@@ -128,7 +150,7 @@ Qed.
 Add Parametric Morphism : isomorphic
   with signature (isomorphic --> isomorphic ++> Basics.impl)
     as impl_isomorphism.
-(* implication respects isomorphism *)
+(* implication respects ≅ / 蕴含尊重 ≅ *)
 Proof.
   intros.
   rewrite H, <- H0.
@@ -138,7 +160,7 @@ Qed.
 Add Parametric Morphism : isomorphic
   with signature (isomorphic --> isomorphic ++> Basics.flip Basics.impl)
     as flip_impl_isomorphism.
-(* flipped implication respects isomorphism *)
+(* flipped implication respects ≅ / 翻转蕴含尊重 ≅ *)
 Proof.
   intros.
   rewrite H, <- H0.
@@ -161,7 +183,9 @@ Proof.
   auto.
 Qed.
 
-(** Adjoint Functors *)
+(* Adjunction F ⊣ G as Hom-iso sketch; curry: (a×-) ⊣ (a→)
+   --------
+   伴随 F ⊣ G 的 Hom 同构草图；curry：(a×-) ⊣ (a→) *)
 
 Definition adjoint (f g : Type -> Type) : Prop :=
   forall a b, f a -> b ≅ a -> g b.
@@ -178,12 +202,14 @@ Proof.
 Qed.
 Arguments curry_adj {a _ _} /.
 
-(** Representable Functors *)
+(* Representable: ∃ R. (R → a) ≅ f a / 可表示：∃ R. (R → a) ≅ f a *)
 
 Definition representable (f : Type -> Type) : Prop :=
   forall a, exists R, R -> a ≅ f a.
 
-(** Sums (coproducts, type addition) *)
+(* Sums (+): monoid laws up to ≅ (zero unit, assoc, sym)
+   --------
+   和类型（+）：在 ≅ 下成幺半群（zero 单位、结合、交换） *)
 
 Lemma f_comp {A B C} (f : B -> C) (g : A -> B) (z : A) :
   f (g z) = (f ∘ g) z.
@@ -192,7 +218,7 @@ Proof. reflexivity. Qed.
 Add Parametric Morphism : sum
   with signature (isomorphic ==> isomorphic ==> isomorphic)
     as sum_isomorphism.
-(* coproducts respect isomorphism *)
+(* coproducts respect ≅ / 余积尊重 ≅ *)
 Proof.
   intros.
   destruct H as [from_x].
@@ -268,12 +294,14 @@ Proof.
   extensionalize.
 Qed.
 
-(** Products (type multiplication) *)
+(* Products (×): monoid + absorb zero; a×two ≅ a+a
+   --------
+   积类型（×）：幺半群 + zero 吸收；a×two ≅ a+a *)
 
 Add Parametric Morphism : prod
   with signature (isomorphic ==> isomorphic ==> isomorphic)
     as prod_isomorphism.
-(* products respect isomorphism *)
+(* products respect ≅ / 积尊重 ≅ *)
 Proof.
   intros.
   destruct H as [from_x].
@@ -369,7 +397,7 @@ Proof.
   extensionalize.
 Qed.
 
-(** Addition distributes over multiplication *)
+(* Distributivity: a×(b+c) ≅ a×b + a×c / 分配律 *)
 
 Theorem mul_add_iso : forall a b c, a * (b + c) ≅ (a * b) + (a * c).
 Proof.
@@ -436,10 +464,12 @@ Proof.
 Qed.
 #[export] Hint Rewrite add_one_mul_iso : isos.
 
-(** Exponentials (type exponentiation) *)
+(* Exponentials (→): a^0≅1, a^1≅a, 1^a≅1, curry laws
+   --------
+   指数（→）：a^0≅1，a^1≅a，1^a≅1，curry 相关律 *)
 
 Theorem exp_zero_iso : forall a, zero -> a ≅ one.
-(* a^0 = 1 *)
+(* a^0 = 1 / 零次幂 *)
 Proof.
   intros.
   exists (fun _ => tt).
@@ -449,7 +479,7 @@ Qed.
 #[export] Hint Rewrite exp_zero_iso : isos.
 
 Theorem exp_one_iso : forall a, one -> a ≅ a.
-(* a^1 = a *)
+(* a^1 = a / 一次幂 *)
 Proof.
   intros.
   exists (fun k => k tt).
@@ -459,7 +489,7 @@ Qed.
 #[export] Hint Rewrite exp_one_iso : isos.
 
 Theorem one_exp_iso : forall a, a -> one ≅ one.
-(* 1^a = a *)
+(* 1^a = 1 (comment said a; proof is one) / 底为 1 *)
 Proof.
   intros.
   exists (fun _ => tt).
@@ -478,7 +508,7 @@ Qed.
 #[export] Hint Rewrite exp_two_iso : isos.
 
 Theorem exp_exp_sym_iso : forall a b c, b -> a -> c ≅ a -> b -> c.
-(* (c^a)^b = (c^b)^a *)
+(* (c^a)^b = (c^b)^a / 指数交换 *)
 Proof. intros; do 2 exists Basics.flip; intuition. Qed.
 
 Lemma exp_exp_sym_dep_iso : forall (a c : Type) (d : c -> Type),
@@ -491,7 +521,9 @@ Proof.
   extensionalize.
 Qed.
 
-(** Exponentiation and multiplication distribute *)
+(* Exp laws: (b×c)^a ≅ b^a×c^a ; c^(a×b) ≅ (c^b)^a
+   --------
+   指数律：(b×c)^a ≅ b^a×c^a；c^(a×b) ≅ (c^b)^a *)
 
 Theorem exp_add_iso : forall a b c,
   ((a + b) -> c) -> c ≅ (a -> c) -> (b -> c) -> c.
@@ -510,7 +542,7 @@ Qed.
 #[export] Hint Rewrite exp_add_iso : isos.
 
 Theorem mul_exp_iso : forall a b c, a -> (b * c) ≅ (a -> b) * (a -> c).
-(* (b * c)^a = b^a * c^a *)
+(* (b * c)^a = b^a * c^a / 积的指数 *)
 Proof.
   intros;
   exists (fun k => ((fun a => fst (k a)), (fun a => snd (k a)))).
@@ -520,7 +552,7 @@ Qed.
 #[export] Hint Rewrite mul_exp_iso : isos.
 
 Corollary exp_mul_iso : forall a b c, (a * b) -> c ≅ a -> b -> c.
-(* c^(a * b) = (c^b)^a *)
+(* c^(a * b) = (c^b)^a / 指数的积 *)
 Proof. intros; rewrite curry_adj, exp_exp_sym_iso; reflexivity. Qed.
 #[export] Hint Rewrite exp_mul_iso : isos.
 
@@ -578,7 +610,7 @@ Proof.
   reflexivity.
 Qed.
 
-(** Multiplication by a constant *)
+(* mul n a ≅ a+…+a (n times) / 常数倍：mul n a ≅ a+…+a *)
 
 Fixpoint mul (n : nat) (a : Type) : Type :=
   match n with
@@ -628,7 +660,7 @@ Proof.
 Qed.
 #[export] Hint Rewrite mul_plus_iso : isos.
 
-(** Exponentation by a constant *)
+(* exp n a ≅ a×…×a (n times) / 常数幂：exp n a ≅ a×…×a *)
 
 Fixpoint exp (n : nat) (a : Type) : Type :=
   match n with
@@ -676,7 +708,9 @@ Proof.
 Qed.
 #[export] Hint Rewrite exp_plus_iso : isos.
 
-(** Lists *)
+(* list a ≅ 1 + a×list a ; list ≅ Σn. exp n a
+   --------
+   list a ≅ 1 + a×list a；list ≅ Σn. exp n a *)
 
 Theorem list_cons_iso : forall a, one + (a * list a) ≅ list a.
 Proof.
@@ -737,7 +771,9 @@ Proof.
     simpl.
 Abort.
 
-(** Identity *)
+(* Identity A ≅ A; Identity is representable
+   --------
+   Identity A ≅ A；Identity 可表示 *)
 
 Theorem identity_iso : forall (A : Type), Identity A ≅ A.
 Proof. reflexivity. Qed.
@@ -752,7 +788,9 @@ Proof.
   extensionalize.
 Qed.
 
-(** Yoneda *)
+(* Yoneda f a ≅ f a; Coyoneda (Lan id) likewise
+   --------
+   Yoneda f a ≅ f a；Coyoneda（Lan id）同理 *)
 
 Import MonadLaws.
 
@@ -768,8 +806,9 @@ Proof.
 Qed.
 #[export] Hint Resolve Yoneda_iso : isos.
 
-(* Given a pair (y -> a, f y), and a function g : y -> x, then the pair
-    (id, fmap g c) is informationally equivalent to the pair (g, c). *)
+(* Coyoneda parametricity: (id, fmap g c) ~ (g, c)
+   --------
+   Coyoneda 参数性：(id, fmap g c) 与 (g, c) 信息等价 *)
 Axiom Coyoneda_parametricity : forall `{Functor f} x y (g : y -> x) (c : f y),
   EqdepFacts.eq_dep Type (fun r : Type => ((r -> x) * f r)%type)
     x (id, fmap g c) y (g, c).
@@ -787,7 +826,7 @@ Proof.
 Qed.
 #[export] Hint Resolve Coyoneda_iso : isos.
 
-(** Cont *)
+(* Cont: (∀ r. Cont r A) ≅ A / 连续单子：∀ r. Cont r A ≅ A *)
 
 Theorem Cont_iso : forall A, (forall r, Cont r A) ≅ A.
 Proof.
@@ -799,11 +838,13 @@ Proof.
 Qed.
 #[export] Hint Rewrite Cont_iso : isos.
 
-(** Reader *)
+(* Reader e a := e → a / 读环境：Reader e a := e → a *)
 
 Definition Reader (e : Type) (a : Type) := e -> a.
 
-(** Codensity *)
+(* Codensity m a := ∀ r. (a → m r) → m r ; ≅ Reader/State forms
+   --------
+   Codensity m a := ∀ r. (a → m r) → m r；与 Reader/State 形同构 *)
 
 Definition Codensity m a := forall r : Type, (a -> m r) -> m r.
 
@@ -819,7 +860,9 @@ Proof.
   reflexivity.
 Qed.
 
-(** Haskell types *)
+(* Maybe ≅ Either unit; Free f ≅ Fix (Either a ∘ f)
+   --------
+   Maybe ≅ Either unit；Free f ≅ Fix (Either a ∘ f) *)
 
 Theorem Maybe_Either_iso : forall a, Either unit a ≅ Maybe a.
 Proof.
@@ -885,7 +928,9 @@ Proof.
   (* extensionalize. *)
 Abort.
 
-(** Lenses *)
+(* VL Lens ↔ IStore / Yoneda embeddings — connects to Control.Lens
+   --------
+   VL Lens ↔ IStore / Yoneda 嵌入 — 衔接 Control.Lens *)
 
 Axiom Lens_parametricity :
   forall `{Functor f} `{Functor g} (eta : forall a, f a -> g a)
@@ -1029,9 +1074,13 @@ Proof.
   extensionality u.
 Abort.
 
-(** Church encodings *)
+(* Church / Lan encodings of algebras (Foo example)
+   --------
+   代数的 Church / Lan 编码（Foo 示例） *)
 
-(* See ../Data/Functor/Kan.v for Lan, Lan_final, and Lan_final_parametricity *)
+(* See Data/Functor/Kan.v for Lan / Lan_final
+   --------
+   Lan 定义见 Data/Functor/Kan.v *)
 
 Lemma Lan_alg_iso : forall f g a,
   Lan f g a -> a ≅ forall x, (f x -> a) -> g x -> a.
